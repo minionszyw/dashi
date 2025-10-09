@@ -13,235 +13,193 @@
 
 ## 📋 项目简介
 
-国学大师是一个基于AI的命理分析微信小程序，为用户提供智能化的命理咨询服务。项目采用前后端分离架构，支持20个并发用户，采用token计费模式。
+国学大师是一个基于AI的命理分析微信小程序，为用户提供智能化的命理咨询服务。项目采用前后端分离架构，支持20+并发用户，采用token计费模式。
 
-### 核心特性
+### ✨ 核心特性
 
 - 🤖 **AI驱动对话** - 基于DeepSeek大模型的智能命理分析
 - 💬 **多轮会话** - 支持上下文记忆的连续对话
 - ⚡ **流式响应** - 实时流式输出，优化用户体验
 - 🔐 **微信登录** - 便捷的微信授权登录
 - 💰 **Token计费** - 灵活的按量计费系统
-- 📊 **数据统计** - 完善的用户数据和交易记录
+- 📊 **完整记录** - 对话历史和交易记录
+
+## 🚀 快速开始
+
+### 前置要求
+
+- Docker 20.10+
+- Docker Compose 2.0+
+- 微信开发者工具（前端开发）
+
+### 5分钟启动
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/yourusername/dashi.git
+cd dashi
+
+# 2. 配置环境变量
+cp backend/config.example.env .env
+vim .env  # 填写必要配置
+
+# 3. 一键启动
+docker-compose up -d
+
+# 4. 验证服务
+curl http://localhost:8000/health
+```
+
+### 必要配置
+
+编辑 `.env` 文件，填写以下配置：
+
+```bash
+# 微信配置（从微信公众平台获取）
+WECHAT_APPID=your-wechat-appid
+WECHAT_SECRET=your-wechat-secret
+
+# DeepSeek配置（从DeepSeek平台获取）
+DEEPSEEK_API_KEY=your-deepseek-api-key
+
+# JWT密钥（生产环境必须修改）
+JWT_SECRET_KEY=your-random-secret-key
+```
+
+### 访问服务
+
+- **API服务**: http://localhost:8000
+- **API文档**: http://localhost:8000/docs
+- **健康检查**: http://localhost:8000/health
+
+### 前端开发
+
+```bash
+cd web
+npm install
+npm run dev:mp-weixin
+```
+
+使用微信开发者工具打开 `web/dist/dev/mp-weixin` 目录。
 
 ## 🏗️ 技术架构
 
-### 整体架构
-
 ```
-┌─────────────┐
-│  微信小程序  │  (uni-app + Vue 3 + TypeScript)
-│   前端层    │
-└──────┬──────┘
-       │ HTTPS/WSS
-       ↓
-┌─────────────┐
-│   Nginx     │  (反向代理 + SSL)
-└──────┬──────┘
-       │
-       ↓
-┌─────────────┐
-│   FastAPI   │  (API服务)
-│   后端层    │
-└──────┬──────┘
-       │
-    ┌──┴──┐
-    ↓     ↓
-┌────────┐ ┌─────────────┐
-│ Redis  │ │ PostgreSQL  │
-│ (缓存) │ │  (主数据库) │
-└────────┘ └─────────────┘
-       │
-       ↓
-┌──────────────┐
-│  LangChain   │
-│  + DeepSeek  │
-│   (AI层)     │
-└──────────────┘
+微信小程序 (uni-app + Vue 3)
+    ↓ HTTPS
+Nginx (反向代理)
+    ↓
+FastAPI (API服务)
+    ↓
+PostgreSQL + Redis
+    ↓
+LangChain + DeepSeek AI
 ```
 
 ### 技术栈
 
-#### 前端
-- **框架**: uni-app 3.0
-- **UI**: 自定义UI组件
-- **语言**: TypeScript + Vue 3 Composition API
-- **构建**: Vite
+**后端**: FastAPI + PostgreSQL + Redis + LangChain + DeepSeek  
+**前端**: uni-app + Vue 3 + TypeScript + Vite  
+**部署**: Docker + Docker Compose + Nginx
 
-#### 后端
-- **框架**: FastAPI 0.109+
-- **数据库**: PostgreSQL 15 + SQLAlchemy 2.0 (async)
-- **缓存**: Redis 7
-- **AI**: LangChain + DeepSeek API
-- **认证**: JWT
+## 📚 功能清单
 
-## 🚀 快速开始
+### 已实现功能
 
-### 环境要求
+| 模块 | 功能 | 状态 |
+|------|------|------|
+| 认证 | 微信登录、JWT认证 | ✅ |
+| 对话 | AI对话、多轮会话 | ✅ |
+| 会话 | 创建、查看、删除 | ✅ |
+| 计费 | Token扣费、余额查询 | ✅ |
+| 交易 | 交易记录、充值订单 | ✅ |
+| 个人 | 用户信息、统计数据 | ✅ |
 
-- Node.js 16+
-- Python 3.11+
-- Docker 20.10+ (可选)
-- PostgreSQL 15+
-- Redis 7+
+### 待实现功能
 
-### 一键启动（Docker）
+- [ ] 微信支付集成
+- [ ] 流式对话前端
+- [ ] 分享裂变
+- [ ] 用户等级体系
 
-```bash
-# 克隆项目
-git clone https://github.com/yourusername/dashi.git
-cd dashi
+## 📖 文档
 
-# 配置环境变量
-cp .env.example .env
-vim .env  # 填写必要配置
+- **[环境搭建](docs/SETUP.md)** - 详细的开发环境配置指南
+- **[架构设计](docs/ARCHITECTURE.md)** - 系统架构和技术设计
+- **[设计文档](docs/DESIGN.md)** - 完整的项目构思和规划
+- **[更新日志](CHANGELOG.md)** - 版本变更记录
 
-# 启动所有服务
-docker-compose up -d
+## 📡 API接口
 
-# 查看运行状态
-docker-compose ps
-```
+### 认证模块
+- `POST /api/v1/auth/wechat/login` - 微信登录
+- `GET /api/v1/auth/user/info` - 获取用户信息
 
-访问：
-- API文档: http://localhost:8000/docs
-- API服务: http://localhost:8000
+### 对话模块
+- `POST /api/v1/chat/sessions` - 创建会话
+- `GET /api/v1/chat/sessions` - 会话列表
+- `GET /api/v1/chat/sessions/{id}` - 会话详情
+- `DELETE /api/v1/chat/sessions/{id}` - 删除会话
+- `POST /api/v1/chat/messages` - 发送消息
 
-### 手动启动
+### 计费模块
+- `GET /api/v1/billing/balance` - 查询余额
+- `GET /api/v1/billing/transactions` - 交易记录
+- `POST /api/v1/billing/recharge` - 发起充值
 
-#### 1. 后端启动
-
-```bash
-cd backend
-
-# 安装依赖
-poetry install
-
-# 配置环境变量
-cp .env.example .env
-vim .env
-
-# 启动数据库（Docker）
-docker-compose up -d db redis
-
-# 初始化数据库
-poetry run python scripts/init_db.py
-
-# 启动服务
-poetry run uvicorn app.main:app --reload
-```
-
-#### 2. 前端启动
-
-```bash
-cd web
-
-# 安装依赖
-npm install
-
-# 配置环境变量
-vim .env.development
-
-# 启动开发服务器
-npm run dev:mp-weixin
-```
-
-#### 3. 微信开发者工具
-
-1. 打开微信开发者工具
-2. 导入项目，选择 `web/dist/dev/mp-weixin` 目录
-3. 配置AppID（可使用测试号）
+完整API文档: http://localhost:8000/docs
 
 ## 📁 项目结构
 
 ```
 dashi/
-├── backend/              # 后端服务
-│   ├── app/
-│   │   ├── api/         # API路由
-│   │   ├── core/        # 核心配置
-│   │   ├── models/      # 数据模型
-│   │   ├── schemas/     # Pydantic模型
-│   │   ├── services/    # 业务逻辑
-│   │   └── main.py      # 应用入口
-│   ├── alembic/         # 数据库迁移
-│   ├── scripts/         # 工具脚本
-│   └── tests/           # 测试
-├── web/                 # 前端小程序
-│   ├── src/
-│   │   ├── api/        # API接口
-│   │   ├── pages/      # 页面
-│   │   ├── utils/      # 工具函数
-│   │   └── static/     # 静态资源
-│   └── package.json
-├── nginx/              # Nginx配置
-├── docker-compose.yml  # Docker编排
-├── Ideation.md        # 项目构思
-├── SETUP.md           # 环境搭建指南
-└── README.md          # 本文件
+├── backend/           # FastAPI后端
+│   ├── app/          # 应用代码
+│   ├── alembic/      # 数据库迁移
+│   └── scripts/      # 工具脚本
+├── web/              # uni-app前端
+│   ├── src/          # 源代码
+│   └── dist/         # 构建输出
+├── nginx/            # Nginx配置
+├── scripts/          # 部署脚本
+└── docs/             # 项目文档
 ```
 
-## 📡 API文档
+## 🛠️ 开发指南
 
-### 核心接口
-
-#### 认证模块 (`/api/v1/auth`)
-- `POST /auth/wechat/login` - 微信登录
-- `GET /auth/user/info` - 获取用户信息
-
-#### 对话模块 (`/api/v1/chat`)
-- `POST /chat/sessions` - 创建会话
-- `GET /chat/sessions` - 获取会话列表
-- `GET /chat/sessions/{id}` - 获取会话详情
-- `DELETE /chat/sessions/{id}` - 删除会话
-- `POST /chat/messages` - 发送消息
-- `POST /chat/messages/stream` - 发送消息（流式）
-
-#### 计费模块 (`/api/v1/billing`)
-- `GET /billing/balance` - 查询余额
-- `GET /billing/transactions` - 交易记录
-- `POST /billing/recharge` - 发起充值
-
-完整API文档：http://localhost:8000/docs
-
-## 💾 数据库设计
-
-### 核心表结构
-
-- **users** - 用户表
-- **chat_sessions** - 会话表
-- **chat_messages** - 消息表
-- **billing_transactions** - 交易记录表
-- **recharge_orders** - 充值订单表
-
-详细设计见 [DATABASE.md](docs/DATABASE.md)
-
-## 🔐 环境配置
-
-### 后端环境变量 (`.env`)
+### 本地开发
 
 ```bash
-# 数据库
-DATABASE_URL=postgresql+asyncpg://dashi:dashi123@localhost:5432/dashi
+# 后端开发
+cd backend
+poetry install
+poetry run uvicorn app.main:app --reload
 
-# Redis
-REDIS_URL=redis://localhost:6379/0
-
-# JWT密钥
-JWT_SECRET_KEY=your-super-secret-jwt-key
-
-# 微信配置
-WECHAT_APPID=your-wechat-appid
-WECHAT_SECRET=your-wechat-secret
-
-# DeepSeek AI
-DEEPSEEK_API_KEY=your-deepseek-api-key
+# 前端开发
+cd web
+npm install
+npm run dev:mp-weixin
 ```
 
-### 前端环境变量 (`.env.development`)
+### 代码规范
 
 ```bash
-VITE_API_BASE_URL=http://localhost:8000
+# Python格式化
+cd backend
+poetry run black .
+poetry run flake8 .
+
+# TypeScript格式化
+cd web
+npm run lint
+```
+
+### 数据库迁移
+
+```bash
+cd backend
+poetry run alembic revision --autogenerate -m "description"
+poetry run alembic upgrade head
 ```
 
 ## 🐳 Docker部署
@@ -260,81 +218,42 @@ export JWT_SECRET_KEY="production-secret"
 export WECHAT_APPID="production-appid"
 export DEEPSEEK_API_KEY="production-key"
 
-# 启动
-docker-compose -f docker-compose.prod.yml up -d
+# 启动服务
+docker-compose up -d
+
+# 查看日志
+docker-compose logs -f api
 ```
 
-## 📚 文档
+## 🔧 常见问题
 
-- [环境搭建指南](SETUP.md) - 完整的开发环境搭建步骤
-- [项目构思](Ideation.md) - 详细的项目规划和设计
-- [后端文档](backend/README.md) - 后端开发文档
-- [前端文档](web/README.md) - 前端开发文档
-- [API文档](http://localhost:8000/docs) - 在线API文档
-
-## 🛠️ 开发指南
-
-### 代码规范
-
+### Q: 数据库连接失败？
 ```bash
-# Python代码格式化
-cd backend
-poetry run black .
-poetry run flake8 .
-poetry run isort .
-
-# 类型检查
-poetry run mypy .
+# 检查数据库状态
+docker-compose ps db
+docker-compose logs db
 ```
 
-### 数据库迁移
+### Q: 微信登录失败？
+检查 `.env` 文件中的 `WECHAT_APPID` 和 `WECHAT_SECRET` 是否正确。
 
-```bash
-# 创建迁移
-poetry run alembic revision --autogenerate -m "description"
+### Q: AI调用失败？
+检查 `DEEPSEEK_API_KEY` 是否有效，账户余额是否充足。
 
-# 执行迁移
-poetry run alembic upgrade head
-```
-
-### 测试
-
-```bash
-# 后端测试
-cd backend
-poetry run pytest
-
-# 前端测试
-cd web
-npm run test
-```
+更多问题请查看 [环境搭建文档](docs/SETUP.md)。
 
 ## 💰 成本估算
 
 ### 开发阶段（月）
 - 服务器: ¥50-100
-- 域名: ¥50/年
 - DeepSeek API: ¥50-200
-- **合计**: ¥100-300/月
+- **合计**: ~¥150/月
 
 ### 运营阶段（月）
 - 服务器: ¥100-200
 - DeepSeek API: ¥500-2000
 - 微信认证: ¥300/年
 - **合计**: ¥600-2200/月
-
-## 📅 开发计划
-
-- [x] 项目初始化
-- [x] 后端框架搭建
-- [x] 数据库设计
-- [x] API开发
-- [x] 前端页面开发
-- [x] Docker配置
-- [ ] 微信支付集成
-- [ ] 性能优化
-- [ ] 安全加固
-- [ ] 上线部署
 
 ## 🤝 贡献指南
 
@@ -346,9 +265,9 @@ npm run test
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 提交Pull Request
 
-## 📝 License
+## 📝 许可证
 
-待定
+本项目采用 [MIT](LICENSE) 许可证。
 
 ## 👥 团队
 
@@ -365,3 +284,6 @@ npm run test
 ---
 
 ⭐ 如果这个项目对你有帮助，请给个Star支持一下！
+
+**当前状态**: 🟢 MVP完成，可投入测试  
+**版本**: v0.1.0
