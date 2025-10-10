@@ -62,3 +62,5 @@ htmlcov/
 # Alembic
 alembic/versions/*.pyc
 
+
+!.env.example
