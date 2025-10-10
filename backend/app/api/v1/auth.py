@@ -4,6 +4,7 @@ from sqlalchemy import select, update
 from datetime import datetime
 from app.core.database import get_db
 from app.core.security import create_access_token
+from app.core.config import settings
 from app.models.user import User
 from app.schemas.user import UserLogin, UserResponse
 from app.schemas.common import ResponseModel
@@ -36,7 +37,7 @@ async def wechat_login(
         user = User(
             openid=openid,
             unionid=unionid,
-            token_balance=0,  # 新用户赠送0 token，可以改为赠送一些
+            token_balance=settings.INITIAL_TOKEN_BALANCE,  # 从环境变量获取初始token
             last_login_at=datetime.utcnow()
         )
         db.add(user)
@@ -70,5 +71,27 @@ async def get_user_info(
     """获取用户信息"""
     return ResponseModel(
         data=UserResponse.model_validate(current_user)
+    )
+
+
+@router.put("/user/info", response_model=ResponseModel)
+async def update_user_info(
+    user_data: dict,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """更新用户信息"""
+    # 更新用户信息
+    if "nickname" in user_data:
+        current_user.nickname = user_data["nickname"]
+    if "avatar_url" in user_data:
+        current_user.avatar_url = user_data["avatar_url"]
+    
+    await db.commit()
+    await db.refresh(current_user)
+    
+    return ResponseModel(
+        data=UserResponse.model_validate(current_user),
+        message="用户信息更新成功"
     )
 

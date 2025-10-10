@@ -113,7 +113,8 @@ LangChain + DeepSeek AI
 | 会话 | 创建、查看、删除 | ✅ |
 | 计费 | Token扣费、余额查询 | ✅ |
 | 交易 | 交易记录、充值订单 | ✅ |
-| 个人 | 用户信息、统计数据 | ✅ |
+| 个人 | 用户信息、统计数据、信息编辑 | ✅ |
+| 管理 | AI风格管理、系统配置 | ✅ |
 
 ### 待实现功能
 
@@ -134,6 +135,7 @@ LangChain + DeepSeek AI
 ### 认证模块
 - `POST /api/v1/auth/wechat/login` - 微信登录
 - `GET /api/v1/auth/user/info` - 获取用户信息
+- `PUT /api/v1/auth/user/info` - 更新用户信息
 
 ### 对话模块
 - `POST /api/v1/chat/sessions` - 创建会话
@@ -146,6 +148,10 @@ LangChain + DeepSeek AI
 - `GET /api/v1/billing/balance` - 查询余额
 - `GET /api/v1/billing/transactions` - 交易记录
 - `POST /api/v1/billing/recharge` - 发起充值
+
+### 管理模块
+- `GET /api/v1/admin/prompts` - 获取AI风格列表
+- `GET /api/v1/admin/prompts/{style}` - 获取指定风格内容
 
 完整API文档: http://localhost:8000/docs
 
@@ -285,5 +291,5 @@ docker-compose logs db
 
 ⭐ 如果这个项目对你有帮助，请给个Star支持一下！
 
-**当前状态**: 🟢 MVP完成，可投入测试  
-**版本**: v0.1.0
+**当前状态**: 🟢 MVP完成，功能完善，可投入测试  
+**版本**: v0.2.0

@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     TOKEN_PRICE_PER_UNIT: float = 0.01
     AI_COST_PER_TOKEN: float = 0.001
     
+    # User Settings
+    INITIAL_TOKEN_BALANCE: float = 100.00
+    
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 10
     RATE_LIMIT_PER_DAY: int = 100

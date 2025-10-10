@@ -1,7 +1,7 @@
 /**
  * 认证相关API
  */
-import { post, get } from '@/utils/request'
+import { post, get, put } from '@/utils/request'
 
 export interface UserInfo {
   id: number
@@ -31,5 +31,12 @@ export function wechatLogin(code: string) {
  */
 export function getUserInfo() {
   return get<UserInfo>('/api/v1/auth/user/info')
+}
+
+/**
+ * 更新用户信息
+ */
+export function updateUserInfo(data: { nickname?: string; avatar_url?: string }) {
+  return put<UserInfo>('/api/v1/auth/user/info', data)
 }
 

@@ -2,10 +2,13 @@
   <view class="profile-container">
     <!-- 用户信息卡片 -->
     <view class="user-card">
-      <image class="user-avatar" :src="userInfo?.avatar_url || '/static/avatar.png'" mode="aspectFill"></image>
+      <image class="user-avatar" :src="userInfo?.avatar_url || '/static/avatar.png'" mode="aspectFill" @tap="handleEditAvatar"></image>
       <view class="user-info">
-        <text class="user-name">{{ userInfo?.nickname || '未设置昵称' }}</text>
+        <text class="user-name" @tap="handleEditNickname">{{ userInfo?.nickname || '未设置昵称' }}</text>
         <text class="user-id">ID: {{ userInfo?.id }}</text>
+      </view>
+      <view class="edit-btn" @tap="handleEditProfile">
+        <text class="edit-text">编辑</text>
       </view>
     </view>
     
@@ -55,7 +58,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getUserInfo } from '@/api/auth'
+import { getUserInfo, updateUserInfo } from '@/api/auth'
 import { getBalance, getTransactions, createRecharge } from '@/api/billing'
 import type { UserInfo } from '@/api/auth'
 import type { Transaction } from '@/api/billing'
@@ -135,6 +138,71 @@ const formatTime = (time: string) => {
   const date = new Date(time)
   return date.toLocaleString()
 }
+
+const handleEditProfile = () => {
+  uni.showActionSheet({
+    itemList: ['修改昵称', '修改头像'],
+    success: (res) => {
+      if (res.tapIndex === 0) {
+        handleEditNickname()
+      } else if (res.tapIndex === 1) {
+        handleEditAvatar()
+      }
+    }
+  })
+}
+
+const handleEditNickname = () => {
+  uni.showModal({
+    title: '修改昵称',
+    editable: true,
+    placeholderText: '请输入新昵称',
+    success: async (res) => {
+      if (res.confirm && res.content) {
+        try {
+          await updateUserInfo({ nickname: res.content })
+          await loadUserInfo()
+          uni.showToast({
+            title: '昵称修改成功',
+            icon: 'success'
+          })
+        } catch (error) {
+          console.error('修改昵称失败:', error)
+          uni.showToast({
+            title: '修改失败',
+            icon: 'error'
+          })
+        }
+      }
+    }
+  })
+}
+
+const handleEditAvatar = () => {
+  uni.chooseImage({
+    count: 1,
+    sizeType: ['compressed'],
+    sourceType: ['album', 'camera'],
+    success: async (res) => {
+      const tempFilePath = res.tempFilePaths[0]
+      // 这里可以上传图片到服务器，暂时使用本地路径
+      try {
+        await updateUserInfo({ avatar_url: tempFilePath })
+        await loadUserInfo()
+        uni.showToast({
+          title: '头像修改成功',
+          icon: 'success'
+        })
+      } catch (error) {
+        console.error('修改头像失败:', error)
+        uni.showToast({
+          title: '修改失败',
+          icon: 'error'
+        })
+      }
+    }
+  })
+}
 </script>
 
 <style scoped>
@@ -151,6 +219,7 @@ const formatTime = (time: string) => {
   display: flex;
   align-items: center;
   margin-bottom: 20rpx;
+  position: relative;
 }
 
 .user-avatar {
@@ -176,6 +245,20 @@ const formatTime = (time: string) => {
   display: block;
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.edit-btn {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 20rpx;
+  padding: 8rpx 16rpx;
+}
+
+.edit-text {
+  font-size: 24rpx;
+  color: #ffffff;
 }
 
 .balance-card {

@@ -2,6 +2,7 @@ from typing import List, Dict, AsyncGenerator
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
 from app.core.config import settings
+from app.core.prompts import get_system_prompt
 import asyncio
 
 
@@ -17,15 +18,8 @@ class AIService:
             temperature=0.7,
         )
         
-        self.system_prompt = """你是一位经验丰富的国学大师，精通命理、八字、风水等传统文化知识。
-你的回答应该：
-1. 专业严谨，引经据典
-2. 通俗易懂，避免过于晦涩的术语
-3. 积极正面，给予建设性建议
-4. 遵守法律法规，不涉及封建迷信
-5. 仅供参考，不作为决策依据
-
-请以友善、专业的态度回答用户的问题。"""
+        # 从配置文件获取系统提示词
+        self.system_prompt = get_system_prompt("default")
     
     def _convert_messages(self, history: List[Dict]) -> List:
         """转换消息格式"""
