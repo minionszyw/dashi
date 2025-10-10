@@ -40,7 +40,7 @@ git clone https://github.com/yourusername/dashi.git
 cd dashi
 
 # 2. 配置环境变量
-cp backend/config.example.env .env
+cp backend/.env.example .env
 vim .env  # 填写必要配置
 
 # 3. 一键启动
