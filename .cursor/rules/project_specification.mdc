@@ -1,0 +1,624 @@
+---
+alwaysApply: true
+---
+
+# 项目开发规范
+
+## 代码规范
+
+### Python (后端)
+
+#### 代码风格
+- 遵循 PEP 8 规范
+- 使用 Black 进行代码格式化
+- 使用 isort 排序导入
+- 使用 pylint/flake8 进行代码检查
+
+#### 命名规范
+- 模块名：`lowercase_with_underscores.py`
+- 类名：`PascalCase`
+- 函数名：`lowercase_with_underscores()`
+- 常量名：`UPPERCASE_WITH_UNDERSCORES`
+- 私有变量：`_leading_underscore`
+
+#### 类型注解
+```python
+from typing import List, Optional
+
+def get_user(user_id: int) -> Optional[User]:
+    """获取用户信息"""
+    pass
+
+async def create_conversation(
+    user_id: int,
+    title: str,
+    bazi_profile_id: Optional[int] = None
+) -> Conversation:
+    """创建会话"""
+    pass
+```
+
+#### 文档字符串
+```python
+def calculate_bazi(birth_info: dict) -> dict:
+    """
+    计算八字信息
+    
+    Args:
+        birth_info: 出生信息字典，包含年月日时
+        
+    Returns:
+        包含完整八字信息的字典
+        
+    Raises:
+        ValueError: 当出生信息格式不正确时
+    """
+    pass
+```
+
+### TypeScript (前端)
+
+#### 代码风格
+- 使用 ESLint + Prettier
+- 使用分号
+- 使用单引号
+- 2空格缩进
+
+#### 命名规范
+- 组件名：`PascalCase.vue`
+- 文件名：`kebab-case.ts`
+- 变量/函数：`camelCase`
+- 常量：`UPPER_CASE`
+- 类型/接口：`PascalCase`
+
+#### 类型定义
+```typescript
+// 定义接口
+interface User {
+  id: string
+  nickname: string
+  avatarUrl: string
+  tokenBalance: number
+}
+
+// 定义类型
+type MessageRole = 'user' | 'assistant' | 'system'
+
+// 函数签名
+async function sendMessage(
+  conversationId: string,
+  content: string
+): Promise<Message> {
+  // ...
+}
+```
+
+## Git 规范
+
+### 分支管理
+- `main`：主分支，生产环境代码
+- `develop`：开发分支
+- `feature/*`：功能分支
+- `bugfix/*`：Bug修复分支
+- `hotfix/*`：紧急修复分支
+
+### 提交信息
+遵循 Conventional Commits 规范：
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+#### Type 类型
+- `feat`：新功能
+- `fix`：Bug修复
+- `docs`：文档更新
+- `style`：代码格式（不影响功能）
+- `refactor`：重构
+- `perf`：性能优化
+- `test`：测试相关
+- `chore`：构建/工具配置
+
+#### 示例
+```
+feat(chat): 实现流式对话功能
+
+- 集成LangChain流式API
+- 添加打字机动画效果
+- 优化消息渲染性能
+
+Closes #123
+```
+
+## 目录结构规范
+
+### 后端结构
+```
+backend/
+├── app/
+│   ├── api/v1/          # API路由（按功能模块划分）
+│   ├── core/            # 核心配置（数据库、安全等）
+│   ├── models/          # 数据库模型（一个文件一个模型）
+│   ├── schemas/         # Pydantic模型（请求/响应）
+│   ├── services/        # 业务逻辑层
+│   └── utils/           # 工具函数
+├── tests/               # 测试文件（镜像app结构）
+└── alembic/             # 数据库迁移
+```
+
+### 前端结构
+```
+frontend/src/
+├── api/                 # API接口封装
+├── components/          # 公共组件
+├── pages/               # 页面（按功能模块划分）
+├── stores/              # Pinia状态管理
+├── utils/               # 工具函数
+├── types/               # TypeScript类型定义
+└── styles/              # 全局样式
+```
+
+## API设计规范
+
+### RESTful API
+- 使用复数名词：`/api/v1/users`
+- 使用HTTP方法：GET/POST/PUT/DELETE
+- 使用HTTP状态码：200/201/400/401/404/500
+
+### 请求格式
+```json
+// POST /api/v1/chat/message
+{
+  "conversationId": "uuid",
+  "content": "消息内容"
+}
+```
+
+### 响应格式
+```json
+// 成功响应
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": "uuid",
+    "content": "响应内容"
+  }
+}
+
+// 错误响应
+{
+  "code": 40001,
+  "message": "Token余额不足",
+  "data": null
+}
+```
+
+## 数据库规范
+
+### 命名规范
+- 表名：`lowercase_plural`（小写复数）
+- 字段名：`lowercase_with_underscores`
+- 索引：`idx_table_column`
+- 外键：`fk_table1_table2`
+
+### 字段规范
+- 主键：统一使用 `UUID`
+- 时间戳：`created_at`, `updated_at`, `deleted_at`
+- 软删除：使用 `deleted_at`
+- JSON字段：使用 `JSONB` 类型
+
+### 迁移规范
+- 每次结构变更创建新的迁移文件
+- 迁移文件命名：`YYYYMMDDHHMMSS_description.py`
+- 包含 upgrade 和 downgrade 函数
+
+## 测试规范
+
+### 单元测试
+- 测试覆盖率 > 80%
+- 文件命名：`test_*.py` 或 `*_test.py`
+- 函数命名：`test_function_name_scenario()`
+
+### 测试结构
+```python
+def test_calculate_bazi_success():
+    """测试八字计算 - 成功场景"""
+    # Arrange
+    birth_info = {...}
+    
+    # Act
+    result = calculate_bazi(birth_info)
+    
+    # Assert
+    assert result['bazi'] == expected
+```
+
+## 安全规范
+
+### 敏感信息
+- 不在代码中硬编码密钥/密码
+- 使用环境变量存储配置
+- 不提交 `.env` 文件到版本控制
+
+### 数据验证
+- 所有用户输入必须验证
+- 使用 Pydantic 进行数据校验
+- SQL 使用参数化查询（防注入）
+
+### 认证授权
+- 使用 JWT 进行身份认证
+- API 接口进行权限校验
+- 敏感操作记录日志
+
+## 性能规范
+
+### 数据库优化
+- 合理使用索引
+- 避免 N+1 查询
+- 使用分页查询大数据集
+- 使用数据库连接池
+
+### 缓存策略
+- 高频查询使用 Redis 缓存
+- 设置合理的过期时间
+- 缓存穿透/击穿/雪崩防护
+
+### 前端优化
+- 使用虚拟列表渲染长列表
+- 图片懒加载
+- 请求防抖/节流
+- 本地缓存常用数据
+
+## 文档规范
+
+### 代码注释
+- 复杂逻辑必须注释
+- 公共函数/类必须有文档字符串
+- 注释保持更新
+
+### API文档
+- 使用 FastAPI 自动生成文档
+- 补充详细的参数说明
+- 提供请求示例
+
+### 更新日志
+- 每次发版更新 CHANGELOG.md
+- 记录重要变更
+- 包含版本号和日期
+
+## 部署规范
+
+### Docker
+- 使用多阶段构建
+- 合理设置资源限制
+- 使用 .dockerignore
+
+### 环境管理
+- 区分开发/测试/生产环境
+- 使用不同的配置文件
+- 生产环境启用错误监控
+
+### 日志管理
+- 统一日志格式
+- 合理设置日志级别
+- 定期清理旧日志
+
+---
+
+**注意**：所有开发者必须严格遵守以上规范，保持代码一致性和可维护性。
+
+# 项目开发规范
+
+## 代码规范
+
+### Python (后端)
+
+#### 代码风格
+- 遵循 PEP 8 规范
+- 使用 Black 进行代码格式化
+- 使用 isort 排序导入
+- 使用 pylint/flake8 进行代码检查
+
+#### 命名规范
+- 模块名：`lowercase_with_underscores.py`
+- 类名：`PascalCase`
+- 函数名：`lowercase_with_underscores()`
+- 常量名：`UPPERCASE_WITH_UNDERSCORES`
+- 私有变量：`_leading_underscore`
+
+#### 类型注解
+```python
+from typing import List, Optional
+
+def get_user(user_id: int) -> Optional[User]:
+    """获取用户信息"""
+    pass
+
+async def create_conversation(
+    user_id: int,
+    title: str,
+    bazi_profile_id: Optional[int] = None
+) -> Conversation:
+    """创建会话"""
+    pass
+```
+
+#### 文档字符串
+```python
+def calculate_bazi(birth_info: dict) -> dict:
+    """
+    计算八字信息
+    
+    Args:
+        birth_info: 出生信息字典，包含年月日时
+        
+    Returns:
+        包含完整八字信息的字典
+        
+    Raises:
+        ValueError: 当出生信息格式不正确时
+    """
+    pass
+```
+
+### TypeScript (前端)
+
+#### 代码风格
+- 使用 ESLint + Prettier
+- 使用分号
+- 使用单引号
+- 2空格缩进
+
+#### 命名规范
+- 组件名：`PascalCase.vue`
+- 文件名：`kebab-case.ts`
+- 变量/函数：`camelCase`
+- 常量：`UPPER_CASE`
+- 类型/接口：`PascalCase`
+
+#### 类型定义
+```typescript
+// 定义接口
+interface User {
+  id: string
+  nickname: string
+  avatarUrl: string
+  tokenBalance: number
+}
+
+// 定义类型
+type MessageRole = 'user' | 'assistant' | 'system'
+
+// 函数签名
+async function sendMessage(
+  conversationId: string,
+  content: string
+): Promise<Message> {
+  // ...
+}
+```
+
+## Git 规范
+
+### 分支管理
+- `main`：主分支，生产环境代码
+- `develop`：开发分支
+- `feature/*`：功能分支
+- `bugfix/*`：Bug修复分支
+- `hotfix/*`：紧急修复分支
+
+### 提交信息
+遵循 Conventional Commits 规范：
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+#### Type 类型
+- `feat`：新功能
+- `fix`：Bug修复
+- `docs`：文档更新
+- `style`：代码格式（不影响功能）
+- `refactor`：重构
+- `perf`：性能优化
+- `test`：测试相关
+- `chore`：构建/工具配置
+
+#### 示例
+```
+feat(chat): 实现流式对话功能
+
+- 集成LangChain流式API
+- 添加打字机动画效果
+- 优化消息渲染性能
+
+Closes #123
+```
+
+## 目录结构规范
+
+### 后端结构
+```
+backend/
+├── app/
+│   ├── api/v1/          # API路由（按功能模块划分）
+│   ├── core/            # 核心配置（数据库、安全等）
+│   ├── models/          # 数据库模型（一个文件一个模型）
+│   ├── schemas/         # Pydantic模型（请求/响应）
+│   ├── services/        # 业务逻辑层
+│   └── utils/           # 工具函数
+├── tests/               # 测试文件（镜像app结构）
+└── alembic/             # 数据库迁移
+```
+
+### 前端结构
+```
+frontend/src/
+├── api/                 # API接口封装
+├── components/          # 公共组件
+├── pages/               # 页面（按功能模块划分）
+├── stores/              # Pinia状态管理
+├── utils/               # 工具函数
+├── types/               # TypeScript类型定义
+└── styles/              # 全局样式
+```
+
+## API设计规范
+
+### RESTful API
+- 使用复数名词：`/api/v1/users`
+- 使用HTTP方法：GET/POST/PUT/DELETE
+- 使用HTTP状态码：200/201/400/401/404/500
+
+### 请求格式
+```json
+// POST /api/v1/chat/message
+{
+  "conversationId": "uuid",
+  "content": "消息内容"
+}
+```
+
+### 响应格式
+```json
+// 成功响应
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": "uuid",
+    "content": "响应内容"
+  }
+}
+
+// 错误响应
+{
+  "code": 40001,
+  "message": "Token余额不足",
+  "data": null
+}
+```
+
+## 数据库规范
+
+### 命名规范
+- 表名：`lowercase_plural`（小写复数）
+- 字段名：`lowercase_with_underscores`
+- 索引：`idx_table_column`
+- 外键：`fk_table1_table2`
+
+### 字段规范
+- 主键：统一使用 `UUID`
+- 时间戳：`created_at`, `updated_at`, `deleted_at`
+- 软删除：使用 `deleted_at`
+- JSON字段：使用 `JSONB` 类型
+
+### 迁移规范
+- 每次结构变更创建新的迁移文件
+- 迁移文件命名：`YYYYMMDDHHMMSS_description.py`
+- 包含 upgrade 和 downgrade 函数
+
+## 测试规范
+
+### 单元测试
+- 测试覆盖率 > 80%
+- 文件命名：`test_*.py` 或 `*_test.py`
+- 函数命名：`test_function_name_scenario()`
+
+### 测试结构
+```python
+def test_calculate_bazi_success():
+    """测试八字计算 - 成功场景"""
+    # Arrange
+    birth_info = {...}
+    
+    # Act
+    result = calculate_bazi(birth_info)
+    
+    # Assert
+    assert result['bazi'] == expected
+```
+
+## 安全规范
+
+### 敏感信息
+- 不在代码中硬编码密钥/密码
+- 使用环境变量存储配置
+- 不提交 `.env` 文件到版本控制
+
+### 数据验证
+- 所有用户输入必须验证
+- 使用 Pydantic 进行数据校验
+- SQL 使用参数化查询（防注入）
+
+### 认证授权
+- 使用 JWT 进行身份认证
+- API 接口进行权限校验
+- 敏感操作记录日志
+
+## 性能规范
+
+### 数据库优化
+- 合理使用索引
+- 避免 N+1 查询
+- 使用分页查询大数据集
+- 使用数据库连接池
+
+### 缓存策略
+- 高频查询使用 Redis 缓存
+- 设置合理的过期时间
+- 缓存穿透/击穿/雪崩防护
+
+### 前端优化
+- 使用虚拟列表渲染长列表
+- 图片懒加载
+- 请求防抖/节流
+- 本地缓存常用数据
+
+## 文档规范
+
+### 代码注释
+- 复杂逻辑必须注释
+- 公共函数/类必须有文档字符串
+- 注释保持更新
+
+### API文档
+- 使用 FastAPI 自动生成文档
+- 补充详细的参数说明
+- 提供请求示例
+
+### 更新日志
+- 每次发版更新 CHANGELOG.md
+- 记录重要变更
+- 包含版本号和日期
+
+## 部署规范
+
+### Docker
+- 使用多阶段构建
+- 合理设置资源限制
+- 使用 .dockerignore
+
+### 环境管理
+- 区分开发/测试/生产环境
+- 使用不同的配置文件
+- 生产环境启用错误监控
+
+### 日志管理
+- 统一日志格式
+- 合理设置日志级别
+- 定期清理旧日志
+
+---
+
+**注意**：所有开发者必须严格遵守以上规范，保持代码一致性和可维护性。
+
