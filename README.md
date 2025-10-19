@@ -80,161 +80,46 @@ dashi/
 ## 🚀 快速开始
 
 ### 前置要求
+- Docker & Docker Compose
+- Node.js 22+
+- Python 3.12+
+- 微信开发者工具
 
-- ✅ Docker & Docker Compose
-- ✅ Node.js 22+
-- ✅ Python 3.12+
-- ✅ 微信开发者工具
-
-### ⚡️ 5分钟快速上手
-
-#### Step 1: 启动后端服务（2分钟）
+### ⚡ 一键启动
 
 ```bash
-# 1. 启动数据库和后端
+# 1. 启动所有服务
 docker-compose up -d
 
-# 2. 等待服务启动完成（约30秒）
-docker-compose logs -f backend
+# 2. 配置环境变量（首次运行）
+cp backend/.env.example backend/.env
+# 编辑 backend/.env 填入你的 OPENAI_API_KEY 和 WX_APPID
 
-# 3. 执行数据库迁移（首次运行）
-docker-compose exec backend alembic revision --autogenerate -m "initial"
-docker-compose exec backend alembic upgrade head
+# 3. 启动前端
+cd frontend && npm install && npm run dev:mp-weixin
 
-# 4. 验证后端运行：访问 http://localhost:8000/docs
+# 4. 打开微信开发者工具，导入 frontend/dist/dev/mp-weixin
 ```
 
-#### Step 2: 启动前端服务（2分钟）
+### ✅ 验证运行
+- **后端API**: http://localhost:8000/docs
+- **前端**: 微信开发者工具预览
 
-```bash
-# 1. 进入前端目录并安装依赖
-cd frontend
-npm install
-
-# 2. 启动微信小程序开发模式
-npm run dev:mp-weixin
-
-# 3. 打开微信开发者工具
-#    - 导入项目：选择 frontend/dist/dev/mp-weixin 目录
-#    - 填入AppID（测试号或正式AppID）
-#    - 开始开发
-```
-
-#### Step 3: 配置密钥（1分钟）
-
-编辑 `backend/.env` 文件（需替换为实际值）：
-
-```env
-# OpenAI配置
-OPENAI_API_KEY=sk-your-real-openai-key
-OPENAI_BASE_URL=https://api.openai.com/v1  # 可选：使用代理
-
-# 微信配置
-WX_APPID=your-wechat-appid
-WX_SECRET=your-wechat-secret
-
-# 用户初始余额
-INITIAL_TOKEN_BALANCE=100
-```
-
-编辑 `frontend/src/manifest.json`：
-
-```json
-{
-  "mp-weixin": {
-    "appid": "your-wechat-appid",
-    "setting": {
-      "urlCheck": false
-    }
-  }
-}
-```
-
-### ✅ 验证功能
-
-#### 1. 后端API测试
-访问 http://localhost:8000/docs，测试以下接口：
-- `GET /health` - 健康检查
-- `POST /api/v1/auth/wx-login` - 登录
-- `POST /api/v1/bazi/calculate` - 八字计算
-
-#### 2. 前端功能测试
-在微信开发者工具中：
-- **登录功能**：点击"微信一键登录"，授权后跳转到对话页
-- **AI对话**：输入消息测试对话，观察流式输出效果
-- **八字排盘**：个人中心 → 八字排盘 → 填写出生信息 → 查看结果
-
-### 🚨 常见问题
-
-#### 后端启动失败
-```bash
-# 查看详细日志
-docker-compose logs backend postgres redis
-
-# 检查端口占用
-sudo netstat -tlnp | grep -E "5432|6379|8000"
-```
-
-#### 微信登录失败
-- 检查 `backend/.env` 中的 `WX_APPID` 和 `WX_SECRET`
-- 检查 `frontend/src/manifest.json` 中的 `appid`
-- 确保前后端配置一致
-
-#### AI对话无响应
-```bash
-# 1. 检查配置
-cat backend/.env | grep OPENAI
-
-# 2. 查看后端日志
-docker-compose logs -f backend
-
-# 3. 如果使用代理，配置OPENAI_BASE_URL
-OPENAI_BASE_URL=https://your-proxy-url/v1
-```
+> 详细的开发环境配置、常见问题解决，请查看 [开发文档](docs/development.md)
 
 ## 📖 文档
 
 - [架构设计](docs/design.md)
 - [开发文档](docs/development.md)
 - [部署文档](docs/deploy.md)
-- [项目规范](project_specification.md)
+- [开发规范](.cursor/rules/)
 - [开发日志](CHANGELOG.md)
 
-## 🔧 开发
+## 🔧 开发与部署
 
-### 后端开发
-
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-### 前端开发
-
-```bash
-cd frontend
-npm run dev:mp-weixin  # 微信小程序
-npm run dev:h5         # H5
-```
-
-## 🧪 测试
-
-```bash
-# 后端测试
-cd backend
-pytest
-
-# 前端测试
-cd frontend
-npm run test
-```
-
-## 📦 部署
-
-参考 [部署文档](docs/deploy.md)
+详细信息请查看：
+- [开发文档](docs/development.md) - 环境配置、调试技巧、常见问题
+- [部署文档](docs/deploy.md) - 生产环境部署、监控、安全加固
 
 ## 📝 许可证
 

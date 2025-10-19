@@ -24,7 +24,7 @@ class Message(Base):
     role = Column(String(20), nullable=False, comment="user/assistant/system")
     content = Column(Text, nullable=False, comment="消息内容")
     token_cost = Column(Integer, default=0, comment="Token消耗")
-    metadata = Column(JSONB, comment="元数据")
+    extra_data = Column(JSONB, comment="元数据")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     
     # 关系

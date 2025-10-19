@@ -1,0 +1,236 @@
+/**
+ * 全局通用样式
+ */
+
+@import './variables.scss';
+@import './mixins.scss';
+
+// ============================================
+// 重置样式
+// ============================================
+
+page {
+  font-family: $font-family;
+  font-size: $font-size-base;
+  color: $text-primary;
+  background: $bg-page;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+view, text, image, button {
+  box-sizing: border-box;
+}
+
+button {
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  
+  &::after {
+    border: none;
+  }
+}
+
+// ============================================
+// 通用容器
+// ============================================
+
+.container {
+  padding: $page-padding;
+}
+
+.safe-area-bottom {
+  @include safe-area-bottom($spacing-base);
+}
+
+// ============================================
+// 通用卡片
+// ============================================
+
+.card {
+  @include card;
+  padding: $spacing-base;
+  margin-bottom: $spacing-base;
+}
+
+.card-hover {
+  @include card-hover;
+  padding: $spacing-base;
+  margin-bottom: $spacing-base;
+}
+
+// ============================================
+// 通用按钮
+// ============================================
+
+.btn-primary {
+  @include btn-primary;
+  width: 100%;
+  height: 88rpx;
+  font-size: $font-size-md;
+}
+
+.btn-secondary {
+  @include btn-secondary;
+  width: 100%;
+  height: 88rpx;
+  font-size: $font-size-md;
+}
+
+// ============================================
+// 文本工具类
+// ============================================
+
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-tertiary {
+  color: $text-tertiary;
+}
+
+.text-disabled {
+  color: $text-disabled;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.ellipsis {
+  @include ellipsis;
+}
+
+.ellipsis-2 {
+  @include ellipsis-multi(2);
+}
+
+.ellipsis-3 {
+  @include ellipsis-multi(3);
+}
+
+// ============================================
+// 布局工具类
+// ============================================
+
+.flex-center {
+  @include flex-center;
+}
+
+.flex-center-y {
+  @include flex-center-y;
+}
+
+.flex-center-x {
+  @include flex-center-x;
+}
+
+.flex-between {
+  @include flex-between;
+}
+
+// ============================================
+// 间距工具类
+// ============================================
+
+.mt-xs { margin-top: $spacing-xs; }
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-base { margin-top: $spacing-base; }
+.mt-lg { margin-top: $spacing-lg; }
+.mt-xl { margin-top: $spacing-xl; }
+
+.mb-xs { margin-bottom: $spacing-xs; }
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-base { margin-bottom: $spacing-base; }
+.mb-lg { margin-bottom: $spacing-lg; }
+.mb-xl { margin-bottom: $spacing-xl; }
+
+.pt-xs { padding-top: $spacing-xs; }
+.pt-sm { padding-top: $spacing-sm; }
+.pt-md { padding-top: $spacing-md; }
+.pt-base { padding-top: $spacing-base; }
+.pt-lg { padding-top: $spacing-lg; }
+.pt-xl { padding-top: $spacing-xl; }
+
+.pb-xs { padding-bottom: $spacing-xs; }
+.pb-sm { padding-bottom: $spacing-sm; }
+.pb-md { padding-bottom: $spacing-md; }
+.pb-base { padding-bottom: $spacing-base; }
+.pb-lg { padding-bottom: $spacing-lg; }
+.pb-xl { padding-bottom: $spacing-xl; }
+
+// ============================================
+// 动画
+// ============================================
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-in {
+  animation: fadeIn $duration-base $ease-apple;
+}
+
+.fade-in-up {
+  animation: fadeInUp $duration-base $ease-apple;
+}
+
+.fade-in-down {
+  animation: fadeInDown $duration-base $ease-apple;
+}
+
+.scale-in {
+  animation: scaleIn $duration-base $ease-apple;
+}
+

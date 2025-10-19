@@ -4,44 +4,70 @@
 			"path": "pages/login/index",
 			"style": {
 				"navigationBarTitleText": "登录",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"backgroundColor": "#f7f8fa"
 			}
 		},
 		{
 			"path": "pages/chat/index",
 			"style": {
 				"navigationBarTitleText": "AI对话",
-				"navigationStyle": "custom"
+				"navigationStyle": "custom",
+				"backgroundColor": "#f7f8fa"
 			}
 		},
 		{
 			"path": "pages/session/index",
 			"style": {
-				"navigationBarTitleText": "会话"
+				"navigationBarTitleText": "会话",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
 			}
 		},
 		{
 			"path": "pages/profile/index",
 			"style": {
-				"navigationBarTitleText": "我的"
+				"navigationBarTitleText": "我的",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
 			}
 		},
 		{
 			"path": "pages/bazi/calculate",
 			"style": {
-				"navigationBarTitleText": "八字排盘"
+				"navigationBarTitleText": "八字排盘",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
 			}
 		},
 		{
 			"path": "pages/bazi/result",
 			"style": {
-				"navigationBarTitleText": "排盘结果"
+				"navigationBarTitleText": "排盘结果",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
 			}
 		},
 		{
 			"path": "pages/bazi/list",
 			"style": {
-				"navigationBarTitleText": "八字档案"
+				"navigationBarTitleText": "八字档案",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/recharge/index",
+			"style": {
+				"navigationBarTitleText": "充值中心",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
 			}
 		}
 	],
@@ -49,7 +75,7 @@
 		"color": "#999999",
 		"selectedColor": "#667eea",
 		"backgroundColor": "#ffffff",
-		"borderStyle": "black",
+		"borderStyle": "white",
 		"list": [
 			{
 				"pagePath": "pages/chat/index",
@@ -75,6 +101,15 @@
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "大师AI命理",
 		"navigationBarBackgroundColor": "#ffffff",
-		"backgroundColor": "#f5f5f5"
+		"backgroundColor": "#f7f8fa",
+		"enablePullDownRefresh": false,
+		"rpxCalcMaxDeviceWidth": 960,
+		"rpxCalcBaseDeviceWidth": 375
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+		}
 	}
 }

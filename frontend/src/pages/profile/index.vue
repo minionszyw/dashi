@@ -1,107 +1,164 @@
 <template>
   <view class="profile-page">
-    <!-- 个人信息区 -->
-    <view class="user-info">
-      <view class="user-header">
-        <image :src="userStore.user?.avatar_url || '/static/default-avatar.png'" class="avatar" />
-        <view class="user-details">
-          <text class="nickname">{{ userStore.user?.nickname || '未设置昵称' }}</text>
-          <text v-if="userStore.user?.birth_info" class="birth">
-            {{ formatBirthInfo(userStore.user.birth_info) }}
-          </text>
+    <!-- 用户信息卡片 -->
+    <view class="user-section">
+      <view class="user-card">
+        <view class="user-header">
+          <image 
+            :src="userStore.user?.avatar_url || '/static/default-avatar.svg'" 
+            class="avatar"
+            mode="aspectFill"
+          />
+          <view class="user-info">
+            <text class="nickname">{{ userStore.user?.nickname || '未设置昵称' }}</text>
+            <text class="user-id">ID: {{ formatUserId(userStore.user?.id) }}</text>
+          </view>
         </view>
-        <text class="edit-btn" @click="handleEditProfile">编辑</text>
-      </view>
-
-      <view class="token-info">
-        <view class="token-item">
-          <text class="label">Token余额</text>
-          <text class="value">{{ formatTokenBalance(userStore.user?.token_balance || 0) }}</text>
+        
+        <!-- Token余额 -->
+        <view class="token-card">
+          <view class="token-header">
+            <view class="token-label">
+              <text class="token-icon">💎</text>
+              <text class="token-text">我的Token</text>
+            </view>
+            <view class="recharge-btn" @click="handleRecharge">
+              <text>充值</text>
+            </view>
+          </view>
+          <text class="token-balance">{{ userStore.user?.token_balance || 0 }}</text>
         </view>
-        <button class="recharge-btn" @click="handleRecharge">充值</button>
       </view>
     </view>
 
-    <!-- 菜单区 -->
+    <!-- 功能列表 -->
     <view class="menu-section">
-      <!-- 八字排盘 -->
+      <!-- 八字管理 -->
       <view class="menu-group">
-        <view class="menu-item" @click="handleBaziCalculate">
+        <view class="menu-item" @click="handleNavigate('/pages/bazi/calculate')">
           <view class="menu-left">
-            <text class="icon">🔮</text>
-            <text class="title">八字排盘</text>
+            <view class="menu-icon-wrapper primary">
+              <text class="menu-icon">📊</text>
+            </view>
+            <text class="menu-title">八字排盘</text>
           </view>
-          <text class="arrow">›</text>
+          <view class="menu-right">
+            <text class="menu-arrow">›</text>
+          </view>
         </view>
-        <view class="menu-item" @click="handleBaziProfiles">
+        
+        <view class="menu-item" @click="handleNavigate('/pages/bazi/list')">
           <view class="menu-left">
-            <text class="icon">📋</text>
-            <text class="title">八字档案管理</text>
+            <view class="menu-icon-wrapper info">
+              <text class="menu-icon">📁</text>
+            </view>
+            <text class="menu-title">八字档案</text>
           </view>
-          <text class="arrow">›</text>
+          <view class="menu-right">
+            <text class="menu-badge" v-if="baziCount > 0">{{ baziCount }}</text>
+            <text class="menu-arrow">›</text>
+          </view>
         </view>
       </view>
 
-      <!-- 系统设置 -->
+      <!-- 订单记录 -->
       <view class="menu-group">
-        <view class="menu-item" @click="handleSettings">
+        <view class="menu-item" @click="handleNavigate('/pages/recharge/index')">
           <view class="menu-left">
-            <text class="icon">⚙️</text>
-            <text class="title">系统设置</text>
+            <view class="menu-icon-wrapper success">
+              <text class="menu-icon">💰</text>
+            </view>
+            <text class="menu-title">充值记录</text>
           </view>
-          <text class="arrow">›</text>
+          <view class="menu-right">
+            <text class="menu-arrow">›</text>
+          </view>
+        </view>
+        
+        <view class="menu-item" @click="handleNavigate('/pages/order/list')">
+          <view class="menu-left">
+            <view class="menu-icon-wrapper warning">
+              <text class="menu-icon">📦</text>
+            </view>
+            <text class="menu-title">消费记录</text>
+          </view>
+          <view class="menu-right">
+            <text class="menu-arrow">›</text>
+          </view>
         </view>
       </view>
 
-      <!-- 关于 -->
+      <!-- 设置 -->
       <view class="menu-group">
+        <view class="menu-item" @click="handleFeedback">
+          <view class="menu-left">
+            <view class="menu-icon-wrapper">
+              <text class="menu-icon">💬</text>
+            </view>
+            <text class="menu-title">意见反馈</text>
+          </view>
+          <view class="menu-right">
+            <text class="menu-arrow">›</text>
+          </view>
+        </view>
+        
         <view class="menu-item" @click="handleAbout">
           <view class="menu-left">
-            <text class="icon">ℹ️</text>
-            <text class="title">关于我们</text>
+            <view class="menu-icon-wrapper">
+              <text class="menu-icon">ℹ️</text>
+            </view>
+            <text class="menu-title">关于我们</text>
           </view>
-          <text class="arrow">›</text>
+          <view class="menu-right">
+            <text class="menu-desc">v1.0.0</text>
+            <text class="menu-arrow">›</text>
+          </view>
         </view>
-      </view>
-
-      <!-- 退出登录 -->
-      <view class="menu-group">
-        <view class="menu-item logout" @click="handleLogout">
+        
+        <view class="menu-item" @click="handleSettings">
           <view class="menu-left">
-            <text class="icon">🚪</text>
-            <text class="title">退出登录</text>
+            <view class="menu-icon-wrapper">
+              <text class="menu-icon">⚙️</text>
+            </view>
+            <text class="menu-title">设置</text>
+          </view>
+          <view class="menu-right">
+            <text class="menu-arrow">›</text>
           </view>
         </view>
       </view>
+    </view>
+
+    <!-- 退出登录 -->
+    <view class="logout-section safe-area-bottom">
+      <button class="logout-button" @click="handleLogout">
+        <text>退出登录</text>
+      </button>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { useUserStore } from '@/stores'
-import { formatTokenBalance } from '@/utils/format'
+import { ref, onMounted, computed } from 'vue'
+import { useUserStore, useBaziStore } from '@/stores'
 
 const userStore = useUserStore()
+const baziStore = useBaziStore()
+
+const baziCount = computed(() => baziStore.profiles.length)
 
 onMounted(async () => {
-  // 刷新用户信息
-  try {
-    await userStore.refreshUser()
-  } catch (error) {
-    console.error('刷新用户信息失败:', error)
-  }
+  // 加载八字档案数量
+  await baziStore.loadProfiles()
 })
 
-function formatBirthInfo(birthInfo: any): string {
-  if (!birthInfo) return ''
-  return `${birthInfo.year}-${birthInfo.month}-${birthInfo.day}`
+function formatUserId(id?: string): string {
+  if (!id) return '---'
+  return id.substring(0, 8)
 }
 
-function handleEditProfile() {
-  uni.navigateTo({
-    url: '/pages/profile/edit'
-  })
+function handleNavigate(url: string) {
+  uni.navigateTo({ url })
 }
 
 function handleRecharge() {
@@ -110,27 +167,25 @@ function handleRecharge() {
   })
 }
 
-function handleBaziCalculate() {
-  uni.navigateTo({
-    url: '/pages/bazi/calculate'
-  })
-}
-
-function handleBaziProfiles() {
-  uni.navigateTo({
-    url: '/pages/bazi/list'
-  })
-}
-
-function handleSettings() {
-  uni.navigateTo({
-    url: '/pages/settings/index'
+function handleFeedback() {
+  uni.showToast({
+    title: '功能开发中',
+    icon: 'none'
   })
 }
 
 function handleAbout() {
-  uni.navigateTo({
-    url: '/pages/about/index'
+  uni.showModal({
+    title: '关于我们',
+    content: '大师AI命理 v1.0.0\n\n专业的命理分析智能助手',
+    showCancel: false
+  })
+}
+
+function handleSettings() {
+  uni.showToast({
+    title: '功能开发中',
+    icon: 'none'
   })
 }
 
@@ -151,146 +206,224 @@ function handleLogout() {
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
 .profile-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: $bg-page;
+  padding-bottom: $spacing-xl;
 }
 
-.user-info {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 60rpx 40rpx 40rpx;
-  color: #fff;
+// ============================================
+// 用户信息区
+// ============================================
+
+.user-section {
+  padding: $spacing-xl $spacing-base $spacing-base;
+}
+
+.user-card {
+  @include card;
+  padding: $spacing-xl;
+  background: $primary-gradient;
+  position: relative;
+  overflow: visible;
 }
 
 .user-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 40rpx;
+  @include flex-center-y;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
 }
 
 .avatar {
   width: 120rpx;
   height: 120rpx;
-  border-radius: 60rpx;
+  border-radius: $radius-round;
+  border: 6rpx solid rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.2);
 }
 
-.user-details {
+.user-info {
   flex: 1;
-  margin-left: 24rpx;
 }
 
 .nickname {
   display: block;
-  font-size: 36rpx;
-  font-weight: bold;
-  margin-bottom: 8rpx;
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: #ffffff;
+  margin-bottom: $spacing-sm;
 }
 
-.birth {
+.user-id {
   display: block;
-  font-size: 24rpx;
-  opacity: 0.8;
+  font-size: $font-size-sm;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.edit-btn {
-  padding: 12rpx 32rpx;
+// Token卡片
+.token-card {
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 40rpx;
-  font-size: 26rpx;
+  backdrop-filter: blur(20rpx);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
 }
 
-.token-info {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32rpx;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 16rpx;
-  backdrop-filter: blur(10rpx);
+.token-header {
+  @include flex-between;
+  margin-bottom: $spacing-base;
 }
 
-.token-item {
-  display: flex;
-  flex-direction: column;
+.token-label {
+  @include flex-center-y;
+  gap: $spacing-sm;
 }
 
-.label {
-  font-size: 24rpx;
-  opacity: 0.8;
-  margin-bottom: 8rpx;
+.token-icon {
+  font-size: $font-size-lg;
 }
 
-.value {
-  font-size: 48rpx;
-  font-weight: bold;
+.token-text {
+  font-size: $font-size-base;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: $font-weight-medium;
 }
 
 .recharge-btn {
-  padding: 12rpx 48rpx;
-  background: #fff;
-  color: #667eea;
-  border-radius: 40rpx;
-  font-size: 28rpx;
-  font-weight: bold;
-
-  &::after {
-    border: none;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: $radius-round;
+  padding: 8rpx $spacing-base;
+  font-size: $font-size-sm;
+  color: #ffffff;
+  font-weight: $font-weight-medium;
+  transition: all $duration-fast $ease-apple;
+  
+  &:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.4);
   }
 }
 
+.token-balance {
+  font-size: 80rpx;
+  font-weight: $font-weight-bold;
+  color: #ffffff;
+  line-height: 1;
+  @include gradient-text(linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%));
+}
+
+// ============================================
+// 菜单列表
+// ============================================
+
 .menu-section {
-  padding: 24rpx 0;
+  padding: 0 $spacing-base;
 }
 
 .menu-group {
-  margin-bottom: 24rpx;
-  background: #fff;
-  border-radius: 16rpx;
+  @include card;
+  margin-bottom: $spacing-base;
   overflow: hidden;
 }
 
 .menu-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32rpx 40rpx;
-  border-bottom: 1rpx solid #f5f5f5;
-
-  &:last-child {
-    border-bottom: none;
+  @include flex-between;
+  padding: $spacing-lg;
+  transition: all $duration-fast $ease-apple;
+  
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $border-color;
   }
-
+  
   &:active {
-    background: #f5f5f5;
-  }
-
-  &.logout {
-    justify-content: center;
-
-    .title {
-      color: #fa5151;
-    }
+    background: $bg-hover;
   }
 }
 
 .menu-left {
-  display: flex;
-  align-items: center;
+  @include flex-center-y;
+  gap: $spacing-lg;
+  flex: 1;
+  min-width: 0;
 }
 
-.icon {
-  font-size: 44rpx;
-  margin-right: 24rpx;
+.menu-icon-wrapper {
+  width: 72rpx;
+  height: 72rpx;
+  @include flex-center;
+  background: $bg-page;
+  border-radius: $radius-lg;
+  flex-shrink: 0;
+  
+  &.primary {
+    background: linear-gradient(135deg, rgba($primary, 0.1) 0%, rgba($primary, 0.2) 100%);
+  }
+  
+  &.info {
+    background: linear-gradient(135deg, rgba($info, 0.1) 0%, rgba($info, 0.2) 100%);
+  }
+  
+  &.success {
+    background: linear-gradient(135deg, rgba($success, 0.1) 0%, rgba($success, 0.2) 100%);
+  }
+  
+  &.warning {
+    background: linear-gradient(135deg, rgba($warning, 0.1) 0%, rgba($warning, 0.2) 100%);
+  }
 }
 
-.title {
-  font-size: 30rpx;
+.menu-icon {
+  font-size: 40rpx;
 }
 
-.arrow {
+.menu-title {
+  font-size: $font-size-md;
+  color: $text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.menu-right {
+  @include flex-center-y;
+  gap: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.menu-badge {
+  @include badge;
+  transform: scale(0.8);
+}
+
+.menu-desc {
+  font-size: $font-size-sm;
+  color: $text-tertiary;
+}
+
+.menu-arrow {
   font-size: 48rpx;
-  color: #ccc;
+  color: $text-disabled;
+  font-weight: $font-weight-light;
+}
+
+// ============================================
+// 退出登录
+// ============================================
+
+.logout-section {
+  padding: $spacing-xxl $spacing-base;
+  @include safe-area-bottom;
+}
+
+.logout-button {
+  @include btn-secondary;
+  height: 88rpx;
+  color: $error;
+  border-color: $error;
+  
+  &:active {
+    background: rgba($error, 0.05);
+  }
 }
 </style>
 

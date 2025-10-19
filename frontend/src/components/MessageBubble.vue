@@ -2,7 +2,7 @@
   <view :class="['message-bubble', message.role]">
     <!-- AI消息 -->
     <template v-if="message.role === 'assistant'">
-      <image :src="aiAvatar" class="avatar" />
+      <view class="avatar emoji">🤖</view>
       <view class="bubble-content">
         <text class="content">{{ message.content }}</text>
         <text class="time">{{ formatTime(message.created_at) }}</text>
@@ -15,10 +15,10 @@
         <text class="content">{{ message.content }}</text>
         <text class="time">{{ formatTime(message.created_at) }}</text>
       </view>
-      <image :src="userAvatar" class="avatar" />
+      <view class="avatar emoji">🧑</view>
     </template>
   </view>
-</template>
+ </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
@@ -34,11 +34,13 @@ const props = defineProps<Props>()
 
 const userStore = useUserStore()
 
-const aiAvatar = '/static/ai-avatar.png'
-const userAvatar = computed(() => userStore.user?.avatar_url || '/static/user-avatar.png')
+// 使用表情占位，避免本地静态资源路径在小程序下 500
+const userAvatar = computed(() => userStore.user?.avatar_url || '')
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/mixins.scss';
+
 .message-bubble {
   display: flex;
   align-items: flex-start;
@@ -67,6 +69,12 @@ const userAvatar = computed(() => userStore.user?.avatar_url || '/static/user-av
   height: 80rpx;
   border-radius: 10rpx;
   flex-shrink: 0;
+}
+
+.emoji {
+  @include flex-center;
+  background: #f0f2f5;
+  font-size: 40rpx;
 }
 
 .bubble-content {

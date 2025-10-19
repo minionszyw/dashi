@@ -1,6 +1,7 @@
 """
 对话相关API
 """
+import json
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -168,40 +169,72 @@ async def send_message(
     db.add(user_message)
     db.commit()
     
+    # 在外部保存ID，避免session问题
+    conversation_id = str(conversation.id)
+    user_id = str(current_user.id)
+    
     # 流式生成AI响应
     async def generate():
+        from app.core.database import SessionLocal
+        
+        # 创建新的db session用于流式响应
+        stream_db = SessionLocal()
+        
         try:
             full_response = ""
             token_cost = 0
             
             async for chunk in chat_service.stream_chat(
                 user_message=message_data.content,
-                conversation_id=str(conversation.id),
-                user_id=str(current_user.id),
-                db=db
+                conversation_id=conversation_id,
+                user_id=user_id,
+                db=stream_db
             ):
-                full_response += chunk["content"]
-                token_cost = chunk.get("token_cost", 0)
-                yield f"data: {chunk}\n\n"
+                if chunk.get("type") == "token":
+                    full_response += chunk.get("content", "")
+                    token_cost = chunk.get("token_cost", 0)
+                
+                # 使用json.dumps确保正确的JSON格式
+                yield f"data: {json.dumps(chunk)}\n\n"
             
             # 保存AI响应
             ai_message = Message(
-                conversation_id=conversation.id,
+                conversation_id=conversation_id,
                 role="assistant",
                 content=full_response,
                 token_cost=token_cost
             )
-            db.add(ai_message)
+            stream_db.add(ai_message)
             
             # 扣减用户token
-            current_user.token_balance -= token_cost
+            user = stream_db.query(User).filter(User.id == user_id).first()
+            if user:
+                user.token_balance -= token_cost
             
-            db.commit()
+            stream_db.commit()
+            stream_db.refresh(ai_message)
             
-            yield f"data: {{'type': 'done', 'message_id': '{ai_message.id}', 'token_cost': {token_cost}}}\n\n"
+            # 发送完成消息
+            done_data = {
+                "type": "done",
+                "message_id": str(ai_message.id),
+                "token_cost": token_cost
+            }
+            yield f"data: {json.dumps(done_data)}\n\n"
             
         except Exception as e:
-            yield f"data: {{'type': 'error', 'message': '{str(e)}'}}\n\n"
+            import traceback
+            error_detail = traceback.format_exc()
+            print(f"流式对话错误: {error_detail}")
+            
+            error_data = {
+                "type": "error",
+                "message": str(e)
+            }
+            yield f"data: {json.dumps(error_data)}\n\n"
+        
+        finally:
+            stream_db.close()
     
     return StreamingResponse(generate(), media_type="text/event-stream")
 

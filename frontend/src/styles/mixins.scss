@@ -1,0 +1,194 @@
+/**
+ * 全局混入（Mixins）
+ * 常用的样式片段
+ */
+
+@import './variables.scss';
+
+// ============================================
+// 布局
+// ============================================
+
+// Flex 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Flex 垂直居中
+@mixin flex-center-y {
+  display: flex;
+  align-items: center;
+}
+
+// Flex 水平居中
+@mixin flex-center-x {
+  display: flex;
+  justify-content: center;
+}
+
+// Flex 两端对齐
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ============================================
+// 文本
+// ============================================
+
+// 单行文本省略
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// 多行文本省略
+@mixin ellipsis-multi($lines: 2) {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+}
+
+// ============================================
+// 卡片样式
+// ============================================
+
+// 基础卡片
+@mixin card {
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-sm;
+  overflow: hidden;
+}
+
+// 悬浮卡片
+@mixin card-hover {
+  @include card;
+  transition: all $duration-base $ease-apple;
+  
+  &:active {
+    transform: scale(0.98);
+    box-shadow: $shadow-xs;
+  }
+}
+
+// ============================================
+// 按钮样式
+// ============================================
+
+// 主按钮
+@mixin btn-primary {
+  background: $primary-gradient;
+  color: #ffffff;
+  border-radius: $radius-round;
+  font-weight: $font-weight-medium;
+  box-shadow: $shadow-sm;
+  transition: all $duration-base $ease-apple;
+  
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+  
+  &::after {
+    border: none;
+  }
+}
+
+// 次要按钮
+@mixin btn-secondary {
+  background: $bg-card;
+  color: $text-primary;
+  border: 2rpx solid $border-color;
+  border-radius: $radius-round;
+  font-weight: $font-weight-medium;
+  transition: all $duration-base $ease-apple;
+  
+  &:active {
+    background: $bg-hover;
+  }
+  
+  &::after {
+    border: none;
+  }
+}
+
+// ============================================
+// 输入框
+// ============================================
+
+@mixin input {
+  background: $bg-card;
+  border: 2rpx solid $border-color;
+  border-radius: $radius-lg;
+  padding: $spacing-base;
+  font-size: $font-size-base;
+  color: $text-primary;
+  transition: all $duration-base $ease-apple;
+  
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 6rpx rgba($primary, 0.1);
+  }
+}
+
+// ============================================
+// 分割线
+// ============================================
+
+@mixin divider {
+  height: 1rpx;
+  background: $divider;
+}
+
+// ============================================
+// 安全区域
+// ============================================
+
+@mixin safe-area-bottom($extra: 0rpx) {
+  padding-bottom: calc(#{$extra} + env(safe-area-inset-bottom));
+}
+
+// ============================================
+// 毛玻璃效果
+// ============================================
+
+@mixin frosted-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+}
+
+// ============================================
+// 渐变文字
+// ============================================
+
+@mixin gradient-text($gradient: $primary-gradient) {
+  background: $gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// ============================================
+// 徽章
+// ============================================
+
+@mixin badge {
+  min-width: 32rpx;
+  height: 32rpx;
+  padding: 0 8rpx;
+  background: $error;
+  color: #ffffff;
+  border-radius: $radius-round;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  @include flex-center;
+}
+

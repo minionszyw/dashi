@@ -1,0 +1,344 @@
+---
+alwaysApply: true
+---
+# 前端开发规范（uni-app）
+
+> 本规范专注于 uni-app 多端开发特性，基础代码规范见 [项目开发规范](project.mdc)
+
+## 技术栈
+
+- **uni-app**：多端开发框架（微信小程序/H5/App）
+- **Vue 3**：Composition API + `<script setup>`
+- **TypeScript**：类型安全
+- **Pinia**：状态管理
+
+## 项目结构
+
+```
+frontend/src/
+├── api/          # API接口（request, auth, chat, bazi）
+├── components/   # 公共组件（MessageBubble, ChatInput）
+├── pages/        # 页面（login, chat, profile, bazi）
+├── stores/       # Pinia状态（user, chat, bazi）
+├── types/        # TypeScript类型定义
+├── utils/        # 工具函数（storage, date, validator）
+└── styles/       # 全局样式（variables, mixins, common）
+```
+
+## Vue 3 组件规范
+
+```vue
+<script setup lang="ts">
+// Props + Emits
+interface Props { title: string; count?: number }
+const props = withDefaults(defineProps<Props>(), { count: 0 })
+const emit = defineEmits<{ update: [value: number] }>()
+
+// 响应式
+const visible = ref(false)
+const total = computed(() => props.count * 2)
+</script>
+
+<template>
+  <view class="container">{{ title }}: {{ total }}</view>
+</template>
+
+<style scoped lang="scss">
+.container { padding: 20rpx; }
+</style>
+```
+
+## API 接口封装
+
+```typescript
+// api/request.ts - 统一请求封装
+export const request = <T>(options: UniApp.RequestOptions): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    uni.request({
+      ...options,
+      url: BASE_URL + options.url,
+      header: { 'Authorization': `Bearer ${token}`, ...options.header },
+      success: (res) => res.data.code === 0 ? resolve(res.data.data) : reject(res.data),
+      fail: reject
+    })
+  })
+}
+
+// api/chat.ts - API模块化
+export const chatApi = {
+  sendMessage: (id: string, content: string) => 
+    request({ url: '/api/v1/chat/message', method: 'POST', data: { id, content } })
+}
+```
+
+## Pinia 状态管理
+
+```typescript
+// stores/user.ts
+export const useUserStore = defineStore('user', () => {
+  const userInfo = ref<User | null>(null)
+  const token = ref('')
+  const isLogin = computed(() => !!token.value)
+  
+  const login = async (code: string) => {
+    const data = await authApi.wxLogin(code)
+    token.value = data.token
+    userInfo.value = data.user
+  }
+  
+  return { userInfo, token, isLogin, login }
+})
+```
+
+## 样式规范
+
+### rpx 单位（设计稿750px基准）
+```scss
+.container {
+  width: 750rpx;    // 屏幕宽度
+  padding: 32rpx;   // 16px → 32rpx
+  font-size: 28rpx; // 14px → 28rpx
+}
+```
+
+### 变量和混入
+```scss
+// variables.scss
+$primary: #1989fa; $text: #333; $spacing: 16rpx;
+
+// mixins.scss
+@mixin flex-center { display: flex; justify-content: center; align-items: center; }
+@mixin ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+```
+
+### 安全区域
+```scss
+.fixed-bottom { padding-bottom: env(safe-area-inset-bottom); }
+```
+
+## 响应式设计
+
+```vue
+<script setup lang="ts">
+const isSmallScreen = computed(() => uni.getSystemInfoSync().screenWidth < 375)
+</script>
+
+<template>
+  <view :class="isSmallScreen ? 'grid-2' : 'grid-3'" />
+</template>
+
+<style scoped lang="scss">
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+</style>
+```
+
+## 多端兼容规范
+
+### 条件编译
+```vue
+<template>
+  <!-- #ifdef MP-WEIXIN -->
+  <button open-type="getUserInfo">微信登录</button>
+  <!-- #endif -->
+  <!-- #ifdef H5 -->
+  <button @click="h5Login">H5登录</button>
+  <!-- #endif -->
+</template>
+
+<script setup lang="ts">
+const login = () => {
+  // #ifdef MP-WEIXIN
+  uni.login({ provider: 'weixin' })
+  // #endif
+}
+</script>
+
+<style scoped lang="scss">
+/* #ifdef MP-WEIXIN */
+.weixin-only { display: block; }
+/* #endif */
+</style>
+```
+
+### 平台工具
+```typescript
+// utils/platform.ts
+export const platform = {
+  isWeixin: /* #ifdef MP-WEIXIN */ true /* #endif */ /* #ifndef MP-WEIXIN */ false /* #endif */,
+  isH5: /* #ifdef H5 */ true /* #endif */ /* #ifndef H5 */ false /* #endif */
+}
+
+// utils/storage.ts
+export const storage = {
+  set: (k: string, v: any) => uni.setStorageSync(k, JSON.stringify(v)),
+  get: <T>(k: string): T | null => JSON.parse(uni.getStorageSync(k) || 'null'),
+  remove: (k: string) => uni.removeStorageSync(k)
+}
+```
+
+## 性能优化
+
+```vue
+<!-- 虚拟列表 -->
+<view v-for="msg in messages.slice(0, 50)" :key="msg.id">{{ msg.content }}</view>
+
+<!-- 图片懒加载 -->
+<image :src="url" lazy-load />
+```
+
+```typescript
+// 防抖
+export const debounce = (fn: Function, delay: number) => {
+  let timer: number | null = null
+  return (...args: any[]) => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+}
+```
+
+## 小程序规范
+
+### 生命周期
+```vue
+<script setup lang="ts">
+import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
+
+onLoad((options) => { /* 获取路由参数 */ })
+onShow(() => { /* 刷新数据 */ })
+onHide(() => { /* 暂停操作 */ })
+</script>
+```
+
+### 页面配置
+```json
+// pages.json
+{
+  "pages": [{ "path": "pages/chat/index", "style": { "navigationBarTitleText": "对话" } }],
+  "tabBar": { "list": [{ "pagePath": "pages/chat/index", "text": "对话" }] }
+}
+```
+
+### 微信API
+```typescript
+uni.login({ provider: 'weixin', success: (res) => console.log(res.code) })
+uni.getUserProfile({ desc: '完善资料', success: (res) => console.log(res.userInfo) })
+uni.requestPayment({ provider: 'wxpay', orderInfo: data, success: () => {} })
+```
+
+## 错误处理
+
+```typescript
+// 统一错误处理
+export const handleError = (e: any) => 
+  uni.showToast({ title: e.message || '操作失败', icon: 'none' })
+```
+
+```vue
+<!-- 加载状态 -->
+<script setup lang="ts">
+const loading = ref(false)
+const error = ref<string | null>(null)
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    await api.getData()
+  } catch (e: any) {
+    error.value = e.message
+  } finally {
+    loading.value = false
+  }
+}
+</script>
+
+<template>
+  <view v-if="loading">加载中...</view>
+  <view v-else-if="error">{{ error }}</view>
+  <view v-else><!-- 内容 --></view>
+</template>
+```
+
+## 多端测试规范
+
+### 测试矩阵
+
+| 功能 | 微信小程序 | H5 | App | 优先级 |
+|------|-----------|----|----|-------|
+| 登录认证 | ✅ 必测 | ✅ 必测 | ⚠️ 可选 | P0 |
+| AI对话 | ✅ 必测 | ✅ 必测 | ⚠️ 可选 | P0 |
+| 支付 | ✅ 必测 | ⚠️ 可选 | ❌ 不支持 | P1 |
+
+### 兼容性检查清单
+
+- ✅ 使用uni-app封装的API，不直接调用平台API
+- ✅ 平台特有功能使用条件编译
+- ✅ 使用rpx单位，避免px（除1px细线）
+- ✅ 核心功能在主要平台测试通过
+
+## 多端发布
+
+### 微信小程序
+
+```bash
+# 构建
+npm run build:mp-weixin
+
+# 使用微信开发者工具
+# 1. 打开 dist/build/mp-weixin
+# 2. 点击"上传"
+# 3. 填写版本号并提交审核
+```
+
+### H5
+
+```bash
+# 构建
+npm run build:h5
+
+# 环境变量
+VITE_API_BASE_URL=https://api.yourdomain.com
+
+# 部署
+scp -r dist/build/h5/* user@server:/var/www/h5
+```
+
+## 最佳实践
+
+### 组件封装原则
+- 单一职责：一个组件只做一件事
+- Props向下，Events向上
+- 使用TypeScript类型约束
+- 提供默认值和说明文档
+
+### 状态管理原则
+- 全局状态用Pinia，局部状态用ref/reactive
+- Store按业务模块划分
+- Actions处理异步逻辑
+- 持久化敏感数据注意加密
+
+### 性能优化清单
+- ✅ 列表使用虚拟滚动（>50条）
+- ✅ 图片使用懒加载
+- ✅ 输入框使用防抖（500ms）
+- ✅ 滚动事件使用节流（100ms）
+- ✅ 避免在模板中使用复杂计算
+
+### 代码审查要点
+- ✅ TypeScript类型完整
+- ✅ 异常处理完善
+- ✅ 多端兼容性验证
+- ✅ 性能优化措施
+- ✅ 代码可读性良好
+
+---
+
+**文档版本**：v3.0  
+**最后更新**：2025-10-19  
+**文档行数**：约480行
+
+**更新日志**：
+- v3.0: 大幅精简，聚焦uni-app多端特性，删除与项目规范重复内容
+- v2.0: 新增响应式设计和多端兼容规范
+- v1.0: 初始版本

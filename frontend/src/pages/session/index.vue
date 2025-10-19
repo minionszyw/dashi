@@ -1,60 +1,95 @@
 <template>
   <view class="session-page">
-    <view class="header">
-      <text class="title">会话</text>
-      <text v-if="!isEditMode" class="edit-btn" @click="toggleEditMode">编辑</text>
-      <text v-else class="done-btn" @click="toggleEditMode">完成</text>
+    <!-- 页面标题栏 -->
+    <view class="page-header">
+      <text class="page-title">会话</text>
+      <text 
+        class="header-action" 
+        @click="toggleEditMode"
+      >
+        {{ isEditMode ? '完成' : '管理' }}
+      </text>
     </view>
 
-    <scroll-view scroll-y class="session-list">
-      <view v-if="chatStore.conversations.length === 0" class="empty">
-        <image src="/static/empty-session.png" class="empty-icon" />
-        <text class="empty-text">还没有会话记录</text>
-        <button class="create-btn" @click="handleCreate">创建会话</button>
+    <!-- 会话列表 -->
+    <scroll-view scroll-y class="session-list" :enhanced="true">
+      <!-- 空状态 -->
+      <view v-if="chatStore.conversations.length === 0" class="empty-state">
+        <view class="empty-card fade-in">
+          <view class="empty-icon">💬</view>
+          <text class="empty-title">还没有会话记录</text>
+          <text class="empty-desc">开始一段新的对话吧</text>
+          <button class="create-button" @click="handleCreate">
+            <text>创建会话</text>
+          </button>
+        </view>
       </view>
 
-      <view
-        v-for="conversation in chatStore.conversations"
-        :key="conversation.id"
-        class="session-item"
-        @click="handleSelect(conversation.id)"
-      >
-        <view v-if="isEditMode" class="checkbox">
-          <checkbox
-            :checked="selectedIds.includes(conversation.id)"
-            @click.stop="toggleSelect(conversation.id)"
-          />
-        </view>
-
-        <view class="session-content">
-          <view class="session-header">
-            <text class="session-title">{{ conversation.title }}</text>
-            <text class="session-time">{{ formatTime(conversation.created_at) }}</text>
+      <!-- 会话卡片 -->
+      <view v-else class="sessions">
+        <view
+          v-for="(conversation, index) in chatStore.conversations"
+          :key="conversation.id"
+          class="session-card"
+          :class="{ 'edit-mode': isEditMode }"
+          @click="handleSelect(conversation.id)"
+        >
+          <!-- 选择框 -->
+          <view v-if="isEditMode" class="checkbox-wrapper" @click.stop>
+            <view 
+              class="checkbox"
+              :class="{ checked: selectedIds.includes(conversation.id) }"
+              @click="toggleSelect(conversation.id)"
+            >
+              <text v-if="selectedIds.includes(conversation.id)" class="check-icon">✓</text>
+            </view>
           </view>
-          <text class="session-preview">{{ getPreview(conversation.id) }}</text>
-        </view>
 
-        <view v-if="!isEditMode" class="arrow">›</view>
+          <!-- 会话内容 -->
+          <view class="session-content">
+            <view class="session-header">
+              <text class="session-title">{{ conversation.title || '新会话' }}</text>
+              <text class="session-time">{{ formatTime(conversation.updated_at) }}</text>
+            </view>
+            <text class="session-preview">{{ getLastMessage(conversation.id) }}</text>
+            <view class="session-footer">
+              <text class="message-count">{{ getMessageCount(conversation.id) }} 条消息</text>
+            </view>
+          </view>
+
+          <!-- 箭头 -->
+          <text v-if="!isEditMode" class="arrow">›</text>
+        </view>
       </view>
     </scroll-view>
 
-    <!-- 编辑模式底部操作栏 -->
-    <view v-if="isEditMode" class="edit-bar">
-      <view class="select-all">
-        <checkbox :checked="isAllSelected" @click="toggleSelectAll" />
-        <text>全选</text>
+    <!-- 编辑模式底部栏 -->
+    <view v-if="isEditMode" class="edit-toolbar safe-area-bottom">
+      <view class="toolbar-left">
+        <view class="select-all" @click="toggleSelectAll">
+          <view class="checkbox" :class="{ checked: isAllSelected }">
+            <text v-if="isAllSelected" class="check-icon">✓</text>
+          </view>
+          <text class="select-text">全选</text>
+        </view>
       </view>
-      <button class="delete-btn" :disabled="selectedIds.length === 0" @click="handleDelete">
-        删除({{ selectedIds.length }})
-      </button>
+      <view class="toolbar-right">
+        <button 
+          class="delete-button"
+          :class="{ disabled: selectedIds.length === 0 }"
+          :disabled="selectedIds.length === 0"
+          @click="handleDelete"
+        >
+          <text>删除{{ selectedIds.length > 0 ? `(${selectedIds.length})` : '' }}</text>
+        </button>
+      </view>
     </view>
   </view>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useChatStore } from '@/stores'
-import { formatTime } from '@/utils/format'
 
 const chatStore = useChatStore()
 
@@ -63,6 +98,10 @@ const selectedIds = ref<string[]>([])
 
 const isAllSelected = computed(() => {
   return selectedIds.value.length === chatStore.conversations.length && chatStore.conversations.length > 0
+})
+
+onMounted(async () => {
+  await chatStore.loadConversations()
 })
 
 function toggleEditMode() {
@@ -90,142 +129,162 @@ function toggleSelectAll() {
 }
 
 function handleSelect(id: string) {
-  if (isEditMode.value) {
-    toggleSelect(id)
-  } else {
-    // 切换到对话页
-    uni.switchTab({
-      url: '/pages/chat/index'
-    })
-    // 切换会话
-    chatStore.switchConversation(id)
-  }
-}
-
-function handleCreate() {
+  if (isEditMode.value) return
+  
+  chatStore.switchConversation(id)
   uni.switchTab({
     url: '/pages/chat/index'
   })
-  chatStore.newConversation()
 }
 
-async function handleDelete() {
-  if (selectedIds.value.length === 0) return
+function handleCreate() {
+  chatStore.newConversation()
+  uni.switchTab({
+    url: '/pages/chat/index'
+  })
+}
 
+function handleDelete() {
+  if (selectedIds.value.length === 0) return
+  
   uni.showModal({
     title: '确认删除',
     content: `确定要删除${selectedIds.value.length}个会话吗？`,
     success: async (res) => {
       if (res.confirm) {
-        try {
-          for (const id of selectedIds.value) {
-            await chatStore.removeConversation(id)
-          }
-          selectedIds.value = []
-          isEditMode.value = false
-          uni.showToast({
-            title: '删除成功',
-            icon: 'success'
-          })
-        } catch (error) {
-          console.error('删除失败:', error)
-          uni.showToast({
-            title: '删除失败',
-            icon: 'none'
-          })
+        for (const id of selectedIds.value) {
+          await chatStore.deleteConversation(id)
         }
+        selectedIds.value = []
+        uni.showToast({
+          title: '删除成功',
+          icon: 'success'
+        })
       }
     }
   })
 }
 
-function getPreview(conversationId: string): string {
-  const messages = chatStore.messages.filter(m => m.conversation_id === conversationId)
-  if (messages.length === 0) return '开始对话...'
-  const lastMessage = messages[messages.length - 1]
-  return lastMessage.content.substring(0, 50) + (lastMessage.content.length > 50 ? '...' : '')
+function getLastMessage(conversationId: string): string {
+  const messages = chatStore.getConversationMessages(conversationId)
+  if (messages.length === 0) return '暂无消息'
+  const lastMsg = messages[messages.length - 1]
+  return lastMsg.content.substring(0, 50) + (lastMsg.content.length > 50 ? '...' : '')
+}
+
+function getMessageCount(conversationId: string): number {
+  return chatStore.getConversationMessages(conversationId).length
+}
+
+function formatTime(dateStr: string): string {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
+  
+  return `${date.getMonth() + 1}月${date.getDate()}日`
 }
 </script>
 
 <style scoped lang="scss">
+@import '@/styles/variables.scss';
+@import '@/styles/mixins.scss';
+
 .session-page {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f5f5f5;
+  background: $bg-page;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32rpx;
-  background: #fff;
-  border-bottom: 1rpx solid #e5e5e5;
+// ============================================
+// 页面头部
+// ============================================
 
-  .title {
-    font-size: 36rpx;
-    font-weight: bold;
-  }
+.page-header {
+  background: $bg-card;
+  padding: $spacing-lg $spacing-base;
+  @include flex-between;
+  border-bottom: 1rpx solid $border-color;
+}
 
-  .edit-btn,
-  .done-btn {
-    font-size: 28rpx;
-    color: #07c160;
+.page-title {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+}
+
+.header-action {
+  font-size: $font-size-md;
+  color: $primary;
+  padding: $spacing-sm $spacing-base;
+  
+  &:active {
+    opacity: 0.7;
   }
 }
+
+// ============================================
+// 会话列表
+// ============================================
 
 .session-list {
   flex: 1;
   overflow-y: auto;
 }
 
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 200rpx 60rpx;
+.sessions {
+  padding: $spacing-base;
+}
 
-  .empty-icon {
-    width: 200rpx;
-    height: 200rpx;
-    opacity: 0.5;
+.session-card {
+  @include card;
+  @include flex-center-y;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-base;
+  transition: all $duration-base $ease-apple;
+  animation: fadeInUp $duration-base $ease-apple backwards;
+  
+  &:nth-child(n) {
+    animation-delay: calc(0.05s * (n - 1));
   }
-
-  .empty-text {
-    margin: 40rpx 0;
-    font-size: 28rpx;
-    color: #999;
+  
+  &.edit-mode {
+    padding-left: $spacing-base;
   }
-
-  .create-btn {
-    width: 300rpx;
-    height: 80rpx;
-    background: #07c160;
-    color: #fff;
-    border-radius: 40rpx;
-    font-size: 28rpx;
-
-    &::after {
-      border: none;
-    }
+  
+  &:not(.edit-mode):active {
+    transform: scale(0.98);
+    background: $bg-hover;
   }
 }
 
-.session-item {
-  display: flex;
-  align-items: center;
-  padding: 32rpx;
-  background: #fff;
-  border-bottom: 1rpx solid #e5e5e5;
-
-  &:active {
-    background: #f5f5f5;
-  }
+.checkbox-wrapper {
+  margin-right: $spacing-base;
 }
 
 .checkbox {
-  margin-right: 24rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border: 3rpx solid $border-color;
+  border-radius: $radius-round;
+  @include flex-center;
+  transition: all $duration-fast $ease-apple;
+  
+  &.checked {
+    background: $primary;
+    border-color: $primary;
+  }
+}
+
+.check-icon {
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  color: #ffffff;
 }
 
 .session-content {
@@ -234,73 +293,151 @@ function getPreview(conversationId: string): string {
 }
 
 .session-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12rpx;
+  @include flex-between;
+  margin-bottom: $spacing-sm;
 }
 
 .session-title {
-  font-size: 32rpx;
-  font-weight: 500;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  @include ellipsis;
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-right: $spacing-base;
 }
 
 .session-time {
-  font-size: 24rpx;
-  color: #999;
-  margin-left: 20rpx;
+  font-size: $font-size-xs;
+  color: $text-tertiary;
   flex-shrink: 0;
 }
 
 .session-preview {
-  font-size: 26rpx;
-  color: #666;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  @include ellipsis-multi(2);
+  line-height: 1.5;
+  margin-bottom: $spacing-sm;
+}
+
+.session-footer {
+  @include flex-center-y;
+}
+
+.message-count {
+  font-size: $font-size-xs;
+  color: $text-tertiary;
 }
 
 .arrow {
   font-size: 48rpx;
-  color: #ccc;
-  margin-left: 20rpx;
+  color: $text-disabled;
+  margin-left: $spacing-base;
+  font-weight: $font-weight-light;
 }
 
-.edit-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24rpx 32rpx;
-  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
-  background: #fff;
-  border-top: 1rpx solid #e5e5e5;
+// ============================================
+// 空状态
+// ============================================
+
+.empty-state {
+  padding: 200rpx $spacing-xl;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 128rpx;
+  margin-bottom: $spacing-xl;
+  opacity: 0.5;
+}
+
+.empty-title {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.empty-desc {
+  display: block;
+  font-size: $font-size-base;
+  color: $text-secondary;
+  margin-bottom: $spacing-xxl;
+}
+
+.create-button {
+  @include btn-primary;
+  width: 400rpx;
+  height: 80rpx;
+  margin: 0 auto;
+}
+
+// ============================================
+// 编辑工具栏
+// ============================================
+
+.edit-toolbar {
+  background: $bg-card;
+  border-top: 1rpx solid $border-color;
+  padding: $spacing-base;
+  @include flex-between;
+  @include safe-area-bottom;
+}
+
+.toolbar-left {
+  flex: 1;
 }
 
 .select-all {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  font-size: 28rpx;
+  @include flex-center-y;
+  gap: $spacing-md;
+  
+  &:active {
+    opacity: 0.7;
+  }
 }
 
-.delete-btn {
-  background: #fa5151;
-  color: #fff;
-  border-radius: 40rpx;
-  padding: 16rpx 48rpx;
-  font-size: 28rpx;
+.select-text {
+  font-size: $font-size-base;
+  color: $text-primary;
+}
 
-  &::after {
-    border: none;
-  }
+.toolbar-right {
+  margin-left: $spacing-base;
+}
 
-  &[disabled] {
+.delete-button {
+  @include btn-secondary;
+  height: 64rpx;
+  padding: 0 $spacing-xl;
+  color: $error;
+  border-color: $error;
+  
+  &.disabled {
     opacity: 0.5;
+  }
+  
+  &:not(.disabled):active {
+    background: rgba($error, 0.1);
+  }
+}
+
+// ============================================
+// 动画
+// ============================================
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
-

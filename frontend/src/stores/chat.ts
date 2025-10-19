@@ -9,7 +9,7 @@ import {
   getConversation,
   createConversation,
   updateConversation,
-  deleteConversation,
+  deleteConversation as deleteConversationApi,
   getChatHistory
 } from '@/api'
 
@@ -93,9 +93,9 @@ export const useChatStore = defineStore('chat', () => {
   /**
    * 删除会话
    */
-  async function removeConversation(conversationId: string) {
+  async function deleteConversation(conversationId: string) {
     try {
-      await deleteConversation(conversationId)
+      await deleteConversationApi(conversationId)
       conversations.value = conversations.value.filter(c => c.id !== conversationId)
       if (currentConversation.value?.id === conversationId) {
         currentConversation.value = null
@@ -175,6 +175,26 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = []
   }
 
+  /**
+   * 清空消息（兼容旧调用名）
+   */
+  function clearMessages() {
+    messages.value = []
+  }
+
+  /**
+   * 获取某会话的消息列表（兼容列表页取最新消息）
+   */
+  function getConversationMessages(conversationId: string): Message[] {
+    if (!conversationId) return []
+    // 如果当前会话就是目标会话，直接返回内存中的 messages
+    if (currentConversation.value?.id === conversationId) {
+      return messages.value
+    }
+    // 非当前会话：按需返回空数组（列表页仅用于展示最新一条，后续切换会话时会加载）
+    return []
+  }
+
   return {
     conversations,
     currentConversation,
@@ -184,13 +204,15 @@ export const useChatStore = defineStore('chat', () => {
     newConversation,
     switchConversation,
     updateConversationTitle,
-    removeConversation,
+    deleteConversation,
     addMessage,
     addUserMessage,
     addAIMessage,
     appendAIMessageContent,
     finalizeAIMessage,
-    clearCurrent
+    clearCurrent,
+    clearMessages,
+    getConversationMessages
   }
 })
 

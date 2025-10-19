@@ -1,0 +1,455 @@
+---
+alwaysApply: true
+---
+# 项目开发规范
+
+## 代码规范
+
+### Python (后端)
+
+#### 代码风格
+- 遵循 PEP 8 规范
+- 使用 Black 进行代码格式化（行长度120）
+- 使用 isort 排序导入
+- 使用 pylint/flake8 进行代码检查
+
+#### 命名规范
+- 模块名：`lowercase_with_underscores.py`
+- 类名：`PascalCase`
+- 函数名：`lowercase_with_underscores()`
+- 常量名：`UPPERCASE_WITH_UNDERSCORES`
+- 私有变量/方法：`_leading_underscore`
+
+#### 类型注解
+```python
+from typing import List, Optional
+
+async def create_conversation(
+    user_id: int,
+    title: str,
+    bazi_profile_id: Optional[int] = None
+) -> Conversation:
+    """创建会话"""
+    pass
+```
+
+#### 文档字符串
+```python
+def calculate_bazi(birth_info: dict) -> dict:
+    """
+    计算八字信息
+    
+    Args:
+        birth_info: 出生信息字典，包含年月日时
+        
+    Returns:
+        包含完整八字信息的字典
+        
+    Raises:
+        ValueError: 当出生信息格式不正确时
+    """
+    pass
+```
+
+### TypeScript (前端)
+
+#### 代码风格
+- 使用 ESLint + Prettier
+- 使用分号，单引号，2空格缩进
+- 使用 Vue 3 Composition API
+
+#### 命名规范
+- 组件名：`PascalCase.vue`
+- 文件名：`kebab-case.ts`
+- 变量/函数：`camelCase`
+- 常量：`UPPER_CASE`
+- 类型/接口：`PascalCase`
+
+#### 类型定义
+```typescript
+interface User {
+  id: string
+  nickname: string
+  avatarUrl: string
+  tokenBalance: number
+}
+
+type MessageRole = 'user' | 'assistant' | 'system'
+
+async function sendMessage(
+  conversationId: string,
+  content: string
+): Promise<Message> {
+  // ...
+}
+```
+
+## Git 规范
+
+### 分支管理
+- `main`：主分支，生产环境代码
+- `develop`：开发分支
+- `feature/*`：功能分支
+- `bugfix/*`：Bug修复分支
+- `hotfix/*`：紧急修复分支
+
+### 提交信息
+遵循 Conventional Commits 规范：
+
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+#### Type 类型
+- `feat`：新功能
+- `fix`：Bug修复
+- `docs`：文档更新
+- `style`：代码格式（不影响功能）
+- `refactor`：重构
+- `perf`：性能优化
+- `test`：测试相关
+- `chore`：构建/工具配置
+
+#### 示例
+```
+feat(chat): 实现流式对话功能
+
+- 集成LangChain流式API
+- 添加打字机动画效果
+- 优化消息渲染性能
+
+Closes #123
+```
+
+## 目录结构规范
+
+### 后端结构
+```
+backend/
+├── app/
+│   ├── api/v1/          # API路由（按功能模块划分）
+│   ├── core/            # 核心配置（数据库、安全等）
+│   ├── models/          # 数据库模型（一个文件一个模型）
+│   ├── schemas/         # Pydantic模型（请求/响应）
+│   ├── services/        # 业务逻辑层
+│   └── utils/           # 工具函数
+├── tests/               # 测试文件（镜像app结构）
+└── alembic/             # 数据库迁移
+```
+
+### 前端结构
+```
+frontend/src/
+├── api/                 # API接口封装
+├── components/          # 公共组件
+├── pages/               # 页面（按功能模块划分）
+├── stores/              # Pinia状态管理
+├── utils/               # 工具函数
+├── types/               # TypeScript类型定义
+└── styles/              # 全局样式
+```
+
+## API设计规范
+
+### RESTful API
+- 使用复数名词：`/api/v1/users`
+- 使用HTTP方法：GET/POST/PUT/DELETE
+- 使用HTTP状态码：200/201/400/401/404/500
+
+### 请求响应格式
+```json
+// 请求
+{
+  "conversationId": "uuid",
+  "content": "消息内容"
+}
+
+// 成功响应
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": "uuid",
+    "content": "响应内容"
+  }
+}
+
+// 错误响应
+{
+  "code": 40001,
+  "message": "Token余额不足",
+  "data": null
+}
+```
+
+## 数据库规范
+
+### 命名规范
+- 表名：`lowercase_plural`（小写复数）
+- 字段名：`lowercase_with_underscores`
+- 索引：`idx_table_column`
+- 外键：`fk_table1_table2`
+
+### 字段规范
+- 主键：统一使用 `UUID`
+- 时间戳：`created_at`, `updated_at`, `deleted_at`
+- 软删除：使用 `deleted_at`
+- JSON字段：使用 `JSONB` 类型（PostgreSQL）
+
+### 迁移规范
+- 每次结构变更创建新的迁移文件
+- 迁移文件命名：`YYYYMMDDHHMMSS_description.py`
+- 必须包含 upgrade 和 downgrade 函数
+
+## 测试规范
+
+### 单元测试
+- 测试覆盖率目标 > 80%
+- 文件命名：`test_*.py` 或 `*_test.py`
+- 函数命名：`test_function_name_scenario()`
+
+### 测试结构（AAA模式）
+```python
+def test_calculate_bazi_success():
+    """测试八字计算 - 成功场景"""
+    # Arrange - 准备测试数据
+    birth_info = {
+        "year": 1990,
+        "month": 1,
+        "day": 1,
+        "hour": 12
+    }
+    
+    # Act - 执行测试
+    result = calculate_bazi(birth_info)
+    
+    # Assert - 断言结果
+    assert result['bazi'] == expected_bazi
+    assert 'dayun' in result
+```
+
+## 安全规范
+
+### 敏感信息
+- ❌ 不在代码中硬编码密钥/密码
+- ✅ 使用环境变量存储配置
+- ❌ 不提交 `.env` 文件到版本控制
+- ✅ 提供 `.env.example` 模板
+
+### 数据验证
+- 所有用户输入必须验证
+- 使用 Pydantic 进行数据校验
+- SQL 使用参数化查询（防注入）
+- API 输入长度限制
+
+### 认证授权
+- 使用 JWT 进行身份认证
+- Token有效期：7天
+- API 接口进行权限校验
+- 敏感操作记录日志
+
+## 性能规范
+
+### 数据库优化
+- 合理使用索引（查询字段、外键、排序字段）
+- 避免 N+1 查询（使用 joinedload）
+- 使用分页查询大数据集
+- 使用数据库连接池
+
+### 缓存策略
+- 高频查询使用 Redis 缓存
+- 设置合理的过期时间
+- 缓存穿透/击穿/雪崩防护
+- 缓存键命名规范：`{模块}:{业务}:{id}`
+
+### 前端优化
+- 虚拟列表渲染长列表（>50条）
+- 图片懒加载
+- 请求防抖（输入框500ms）/节流（滚动100ms）
+- 本地缓存常用数据（uni.storage）
+- 预加载关键资源
+
+### API限流
+```python
+# 每分钟10次
+@limiter.limit("10/minute")
+async def send_message(request: Request):
+    pass
+
+# 每小时100次（基于用户）
+@limiter.limit("100/hour", key_func=get_user_id)
+async def create_conversation(request: Request):
+    pass
+```
+
+## 日志规范
+
+### 日志级别
+- `DEBUG`：调试信息（开发环境）
+- `INFO`：常规信息（正常业务流程）
+- `WARNING`：警告信息（非预期但可处理）
+- `ERROR`：错误信息（需要关注的异常）
+- `CRITICAL`：严重错误（系统崩溃）
+
+### 日志格式
+```python
+{
+    "timestamp": "2025-10-19T10:30:00Z",
+    "level": "INFO",
+    "module": "chat",
+    "user_id": "uuid",
+    "action": "send_message",
+    "duration_ms": 1234,
+    "status": "success",
+    "details": {...}
+}
+```
+
+### 日志内容
+- 记录关键业务操作（登录、支付、对话）
+- 记录错误和异常堆栈
+- 记录性能指标（响应时间、Token消耗）
+- 敏感信息脱敏（密码、手机号）
+
+## 文档规范
+
+### 代码注释
+- 复杂逻辑必须注释
+- 公共函数/类必须有文档字符串
+- 注释保持更新，避免过时注释
+
+### API文档
+- 使用 FastAPI 自动生成文档
+- 补充详细的参数说明
+- 提供请求示例和错误码说明
+
+### 项目文档
+项目仅使用5个核心文档，不新增项目文档：
+- `README.md` - 项目简介和文档导航
+- `CHANGELOG.md` - 项目开发记录
+- `docs/design.md` - 项目设计架构
+- `docs/development.md` - 开发文档
+- `docs/deploy.md` - 部署文档
+
+### 更新日志
+- 每次发版更新 CHANGELOG.md
+- 记录重要变更
+- 包含版本号和日期
+
+## 错误处理规范
+
+### 自定义异常
+```python
+class BaziCalculationError(Exception):
+    """八字计算异常"""
+    pass
+
+class InsufficientTokenError(Exception):
+    """Token余额不足"""
+    pass
+```
+
+### 统一错误码
+```python
+# 成功
+SUCCESS = 0
+
+# 客户端错误 4xxxx
+INVALID_PARAMS = 40000
+INSUFFICIENT_TOKEN = 40001
+UNAUTHORIZED = 40100
+
+# 服务器错误 5xxxx
+INTERNAL_ERROR = 50000
+DATABASE_ERROR = 50001
+AI_SERVICE_ERROR = 50002
+```
+
+### 错误响应
+```python
+@app.exception_handler(InsufficientTokenError)
+async def insufficient_token_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "code": 40001,
+            "message": "Token余额不足",
+            "data": None
+        }
+    )
+```
+
+## 部署规范
+
+### Docker
+- 使用多阶段构建减小镜像体积
+- 合理设置资源限制（CPU、内存）
+- 使用 `.dockerignore` 排除不必要文件
+- 使用非root用户运行容器
+
+### 环境管理
+- 严格区分开发/测试/生产环境
+- 使用不同的配置文件
+- 生产环境启用错误监控
+- 定期备份数据库
+
+### 日志管理
+- 统一日志格式（JSON）
+- 合理设置日志级别
+- 定期清理旧日志
+- 使用日志收集系统（ELK/Loki）
+
+## 监控规范
+
+### 关键指标
+- API响应时间（P50/P95/P99）
+- 数据库查询性能
+- Token消耗统计
+- 错误率和异常率
+- 并发用户数
+- 系统资源使用率
+
+### 告警规则
+- API响应时间 > 3秒
+- 错误率 > 5%
+- 数据库连接池耗尽
+- Redis连接失败
+- 磁盘使用率 > 80%
+
+## LangChain开发规范
+
+### Prompt设计
+- 系统提示词清晰明确
+- 包含必要的上下文信息
+- 设置合理的温度参数（0.7-0.9）
+- 限制输出长度避免Token浪费
+
+### 状态管理
+```python
+class ChatState(TypedDict):
+    user_input: str
+    user_id: str
+    conversation_id: str
+    bazi_info: dict
+    context_messages: list
+    response: str
+    token_cost: int
+```
+
+### 错误处理
+- 捕获 LLM 调用超时
+- 处理 API 限流错误
+- 记录Token消耗
+- 失败重试机制（最多3次）
+
+---
+
+**注意**：所有开发者必须严格遵守以上规范，保持代码一致性和可维护性。
+
+**文档版本**：v2.0  
+**最后更新**：2025-10-19  
+**文档行数**：约480行
