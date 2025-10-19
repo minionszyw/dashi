@@ -1,14 +1,10 @@
 <template>
   <view class="session-page">
-    <!-- 页面标题栏 -->
-    <view class="page-header">
-      <text class="page-title">会话</text>
-      <text 
-        class="header-action" 
-        @click="toggleEditMode"
-      >
-        {{ isEditMode ? '完成' : '管理' }}
-      </text>
+    <!-- 自定义导航栏 -->
+    <view class="navbar safe-area-top">
+      <view class="navbar-content">
+        <text class="page-title">会话</text>
+      </view>
     </view>
 
     <!-- 会话列表 -->
@@ -83,6 +79,11 @@
           <text>删除{{ selectedIds.length > 0 ? `(${selectedIds.length})` : '' }}</text>
         </button>
       </view>
+    </view>
+
+    <!-- 右下角悬浮管理按钮 -->
+    <view class="fab-button" @click="toggleEditMode">
+      <text class="fab-text">{{ isEditMode ? '完成' : '管理' }}</text>
     </view>
   </view>
 </template>
@@ -177,14 +178,21 @@ function getMessageCount(conversationId: string): number {
 }
 
 function formatTime(dateStr: string): string {
+  if (!dateStr) return ''
+  
   const date = new Date(dateStr)
   const now = new Date()
   const diff = now.getTime() - date.getTime()
   
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
-  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+  const week = 7 * day
+  
+  if (diff < minute) return '刚刚'
+  if (diff < hour) return `${Math.floor(diff / minute)}分钟前`
+  if (diff < day) return `${Math.floor(diff / hour)}小时前`
+  if (diff < week) return `${Math.floor(diff / day)}天前`
   
   return `${date.getMonth() + 1}月${date.getDate()}日`
 }
@@ -202,31 +210,28 @@ function formatTime(dateStr: string): string {
 }
 
 // ============================================
-// 页面头部
+// 自定义导航栏
 // ============================================
 
-.page-header {
+.navbar {
   background: $bg-card;
-  padding: $spacing-lg $spacing-base;
-  @include flex-between;
   border-bottom: 1rpx solid $border-color;
+  padding-top: env(safe-area-inset-top);
+}
+
+.navbar-content {
+  height: 88rpx;
+  padding: 0 $spacing-base;
+  @include flex-between;
+  align-items: center;
 }
 
 .page-title {
-  font-size: $font-size-xxl;
+  font-size: $font-size-xl;
   font-weight: $font-weight-bold;
   color: $text-primary;
 }
 
-.header-action {
-  font-size: $font-size-md;
-  color: $primary;
-  padding: $spacing-sm $spacing-base;
-  
-  &:active {
-    opacity: 0.7;
-  }
-}
 
 // ============================================
 // 会话列表
@@ -424,6 +429,35 @@ function formatTime(dateStr: string): string {
   &:not(.disabled):active {
     background: rgba($error, 0.1);
   }
+}
+
+// ============================================
+// 悬浮按钮
+// ============================================
+
+.fab-button {
+  position: fixed;
+  right: $spacing-xl;
+  bottom: calc($spacing-xxl + env(safe-area-inset-bottom));
+  width: 120rpx;
+  height: 120rpx;
+  @include flex-center;
+  background: $primary-gradient;
+  border-radius: $radius-round;
+  box-shadow: 0 8rpx 24rpx rgba($primary, 0.4);
+  z-index: 1000;
+  transition: all $duration-base $ease-apple;
+  
+  &:active {
+    transform: scale(0.9);
+    box-shadow: 0 4rpx 12rpx rgba($primary, 0.3);
+  }
+}
+
+.fab-text {
+  font-size: $font-size-base;
+  color: #ffffff;
+  font-weight: $font-weight-semibold;
 }
 
 // ============================================

@@ -183,6 +183,16 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   /**
+   * 删除指定消息
+   */
+  function removeMessage(messageId: string) {
+    const index = messages.value.findIndex(m => m.id === messageId)
+    if (index !== -1) {
+      messages.value.splice(index, 1)
+    }
+  }
+
+  /**
    * 获取某会话的消息列表（兼容列表页取最新消息）
    */
   function getConversationMessages(conversationId: string): Message[] {
@@ -212,6 +222,7 @@ export const useChatStore = defineStore('chat', () => {
     finalizeAIMessage,
     clearCurrent,
     clearMessages,
+    removeMessage,
     getConversationMessages
   }
 })

@@ -10,7 +10,7 @@
         <view class="logo-wrapper">
           <image src="/static/logo.png" mode="aspectFit" class="logo" />
         </view>
-        <text class="app-name">大师AI命理</text>
+        <text class="app-name">国学大师</text>
         <text class="app-slogan">专业命理分析 · 智能对话助手</text>
       </view>
       

@@ -11,31 +11,37 @@
           />
           <view class="user-info">
             <text class="nickname">{{ userStore.user?.nickname || '未设置昵称' }}</text>
-            <text class="user-id">ID: {{ formatUserId(userStore.user?.id) }}</text>
+            <text class="user-id">ID: {{ formatUserId(userStore.user?.openid) }}</text>
+          </view>
+          <view class="edit-btn" @click="handleEditProfile">
+            <text class="edit-text">编辑</text>
           </view>
         </view>
         
-        <!-- Token余额 -->
+        <!-- 余额 -->
         <view class="token-card">
           <view class="token-header">
             <view class="token-label">
-              <text class="token-icon">💎</text>
-              <text class="token-text">我的Token</text>
+              <text class="token-icon">💰</text>
+              <text class="token-text">我的余额</text>
             </view>
             <view class="recharge-btn" @click="handleRecharge">
               <text>充值</text>
             </view>
           </view>
-          <text class="token-balance">{{ userStore.user?.token_balance || 0 }}</text>
+          <view class="balance-wrapper">
+            <text class="balance-symbol">¥</text>
+            <text class="token-balance">{{ (userStore.user?.token_balance || 0) / 100 }}</text>
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 功能列表 -->
     <view class="menu-section">
-      <!-- 八字管理 -->
+      <!-- 菜单区 -->
       <view class="menu-group">
-        <view class="menu-item" @click="handleNavigate('/pages/bazi/calculate')">
+        <view class="menu-item" @click="handleBazi">
           <view class="menu-left">
             <view class="menu-icon-wrapper primary">
               <text class="menu-icon">📊</text>
@@ -43,39 +49,24 @@
             <text class="menu-title">八字排盘</text>
           </view>
           <view class="menu-right">
+            <text class="menu-desc" v-if="baziCount > 0">已设置</text>
             <text class="menu-arrow">›</text>
           </view>
         </view>
         
-        <view class="menu-item" @click="handleNavigate('/pages/bazi/list')">
+        <view class="menu-item" @click="handleSettings">
           <view class="menu-left">
             <view class="menu-icon-wrapper info">
-              <text class="menu-icon">📁</text>
+              <text class="menu-icon">⚙️</text>
             </view>
-            <text class="menu-title">八字档案</text>
-          </view>
-          <view class="menu-right">
-            <text class="menu-badge" v-if="baziCount > 0">{{ baziCount }}</text>
-            <text class="menu-arrow">›</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 订单记录 -->
-      <view class="menu-group">
-        <view class="menu-item" @click="handleNavigate('/pages/recharge/index')">
-          <view class="menu-left">
-            <view class="menu-icon-wrapper success">
-              <text class="menu-icon">💰</text>
-            </view>
-            <text class="menu-title">充值记录</text>
+            <text class="menu-title">系统设置</text>
           </view>
           <view class="menu-right">
             <text class="menu-arrow">›</text>
           </view>
         </view>
         
-        <view class="menu-item" @click="handleNavigate('/pages/order/list')">
+        <view class="menu-item" @click="handleConsumption">
           <view class="menu-left">
             <view class="menu-icon-wrapper warning">
               <text class="menu-icon">📦</text>
@@ -86,10 +77,7 @@
             <text class="menu-arrow">›</text>
           </view>
         </view>
-      </view>
-
-      <!-- 设置 -->
-      <view class="menu-group">
+        
         <view class="menu-item" @click="handleFeedback">
           <view class="menu-left">
             <view class="menu-icon-wrapper">
@@ -111,18 +99,6 @@
           </view>
           <view class="menu-right">
             <text class="menu-desc">v1.0.0</text>
-            <text class="menu-arrow">›</text>
-          </view>
-        </view>
-        
-        <view class="menu-item" @click="handleSettings">
-          <view class="menu-left">
-            <view class="menu-icon-wrapper">
-              <text class="menu-icon">⚙️</text>
-            </view>
-            <text class="menu-title">设置</text>
-          </view>
-          <view class="menu-right">
             <text class="menu-arrow">›</text>
           </view>
         </view>
@@ -152,18 +128,65 @@ onMounted(async () => {
   await baziStore.loadProfiles()
 })
 
-function formatUserId(id?: string): string {
-  if (!id) return '---'
-  return id.substring(0, 8)
+// 将openid转换为8位数字ID
+function formatUserId(openid?: string): string {
+  if (!openid) return '--------'
+  
+  // 使用简单哈希算法将openid转为8位数字
+  let hash = 0
+  for (let i = 0; i < openid.length; i++) {
+    hash = ((hash << 5) - hash) + openid.charCodeAt(i)
+    hash = hash & hash // 转为32位整数
+  }
+  
+  // 取绝对值并转为8位数字（10000000-99999999）
+  const num = Math.abs(hash) % 90000000 + 10000000
+  return String(num)
 }
 
-function handleNavigate(url: string) {
-  uni.navigateTo({ url })
+function handleEditProfile() {
+  uni.navigateTo({
+    url: '/pages/profile/edit'
+  })
 }
 
 function handleRecharge() {
   uni.navigateTo({
     url: '/pages/recharge/index'
+  })
+}
+
+function handleBazi() {
+  // 如果已有八字，跳转到列表；否则跳转到排盘
+  if (baziCount.value > 0) {
+    uni.navigateTo({
+      url: '/pages/bazi/list'
+    })
+  } else {
+    uni.showModal({
+      title: '八字排盘',
+      content: '您还没有设置八字信息，是否现在设置？',
+      success: (res) => {
+        if (res.confirm) {
+          uni.navigateTo({
+            url: '/pages/bazi/calculate'
+          })
+        }
+      }
+    })
+  }
+}
+
+function handleSettings() {
+  uni.navigateTo({
+    url: '/pages/profile/settings'
+  })
+}
+
+function handleConsumption() {
+  uni.showToast({
+    title: '消费记录功能开发中',
+    icon: 'none'
   })
 }
 
@@ -179,13 +202,6 @@ function handleAbout() {
     title: '关于我们',
     content: '大师AI命理 v1.0.0\n\n专业的命理分析智能助手',
     showCancel: false
-  })
-}
-
-function handleSettings() {
-  uni.showToast({
-    title: '功能开发中',
-    icon: 'none'
   })
 }
 
@@ -263,6 +279,24 @@ function handleLogout() {
   color: rgba(255, 255, 255, 0.8);
 }
 
+.edit-btn {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: $radius-base;
+  padding: 8rpx $spacing-lg;
+  transition: all $duration-fast $ease-apple;
+  
+  &:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.edit-text {
+  font-size: $font-size-sm;
+  color: #ffffff;
+  font-weight: $font-weight-medium;
+}
+
 // Token卡片
 .token-card {
   background: rgba(255, 255, 255, 0.2);
@@ -306,11 +340,23 @@ function handleLogout() {
   }
 }
 
+.balance-wrapper {
+  @include flex-center-y;
+  gap: 8rpx;
+  line-height: 1;
+}
+
+.balance-symbol {
+  font-size: 48rpx;
+  font-weight: $font-weight-bold;
+  color: #ffffff;
+  margin-top: 8rpx;
+}
+
 .token-balance {
   font-size: 80rpx;
   font-weight: $font-weight-bold;
   color: #ffffff;
-  line-height: 1;
   @include gradient-text(linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%));
 }
 

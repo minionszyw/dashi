@@ -84,28 +84,27 @@
     <!-- 输入区域 -->
     <view class="input-area safe-area-bottom">
       <view class="input-container">
-        <view class="input-wrapper">
-          <view class="icon-btn" @click="handleMore">
-            <text class="icon-text">➕</text>
-          </view>
-          <input
-            v-model="inputText"
-            class="input-field"
-            type="text"
-            :placeholder="isAITyping ? 'AI正在思考中...' : '说点什么...'"
-            :disabled="isAITyping"
-            confirm-type="send"
-            @confirm="handleSend"
-            @focus="handleInputFocus"
-            @blur="handleInputBlur"
-          />
-          <view 
-            class="send-btn"
-            :class="{ active: canSend }"
-            @click="handleSend"
-          >
-            <text class="send-icon">{{ isAITyping ? '⏸' : '➤' }}</text>
-          </view>
+        <view class="tool-btn" @click="handleMore" v-if="!canSend">
+          <text class="tool-icon">➕</text>
+        </view>
+        <input
+          v-model="inputText"
+          class="input-field"
+          type="text"
+          :placeholder="isAITyping ? 'AI正在思考中...' : ''"
+          placeholder="说点什么..."
+          :disabled="isAITyping"
+          confirm-type="send"
+          @confirm="handleSend"
+          @focus="handleInputFocus"
+          @blur="handleInputBlur"
+        />
+        <view 
+          class="send-btn"
+          :class="{ active: canSend }"
+          @click="handleSend"
+        >
+          <text class="send-text">发送</text>
         </view>
       </view>
     </view>
@@ -350,18 +349,37 @@ async function handleNewConversation() {
 }
 
 // 清空对话
-function handleClearChat() {
+async function handleClearChat() {
   menuPopup.value.close()
   uni.showModal({
     title: '确认清空',
     content: '确定要清空当前对话吗？此操作不可恢复',
-    success: (res) => {
+    success: async (res) => {
       if (res.confirm) {
-        chatStore.clearMessages()
-        uni.showToast({
-          title: '已清空',
-          icon: 'success'
-        })
+        try {
+          const oldConversationId = chatStore.currentConversation?.id
+          
+          // 删除当前会话
+          if (oldConversationId) {
+            await chatStore.deleteConversation(oldConversationId)
+          }
+          
+          // 创建新会话
+          await chatStore.newConversation()
+          
+          uni.showToast({
+            title: '已清空',
+            icon: 'success'
+          })
+          
+          scrollToBottom()
+        } catch (error) {
+          console.error('清空对话失败:', error)
+          uni.showToast({
+            title: '清空失败',
+            icon: 'none'
+          })
+        }
       }
     }
   })
@@ -603,80 +621,78 @@ function scrollToBottom() {
 }
 
 // ============================================
-// 输入区域
+// 输入区域（微信风格）
 // ============================================
 
 .input-area {
-  background: $bg-card;
-  border-top: 1rpx solid $border-color;
-  @include safe-area-bottom($spacing-base);
+  background: #f7f7f7;
+  border-top: 1rpx solid #d9d9d9;
+  @include safe-area-bottom;
 }
 
 .input-container {
-  padding: $spacing-base;
-}
-
-.input-wrapper {
-  @include flex-center-y;
+  padding: 16rpx;
+  display: flex;
+  align-items: center;
   gap: $spacing-md;
-  background: $bg-page;
-  border-radius: $radius-round;
-  padding: 8rpx 8rpx 8rpx $spacing-base;
-  transition: all $duration-base $ease-apple;
 }
 
-.icon-btn {
+.tool-btn {
   width: 56rpx;
   height: 56rpx;
   @include flex-center;
-  border-radius: $radius-round;
-  background: $bg-card;
+  flex-shrink: 0;
   transition: all $duration-fast $ease-apple;
   
   &:active {
-    transform: scale(0.9);
-    background: $bg-hover;
+    opacity: 0.6;
   }
 }
 
-.icon-text {
-  font-size: $font-size-lg;
+.tool-icon {
+  font-size: 44rpx;
   color: $text-secondary;
 }
 
 .input-field {
   flex: 1;
-  height: 56rpx;
-  font-size: $font-size-base;
+  min-width: 0;
+  background: #ffffff;
+  border-radius: 8rpx;
+  padding: 14rpx $spacing-base;
+  font-size: 30rpx;
+  line-height: 1.4;
   color: $text-primary;
+  height: 72rpx;
   
   &::placeholder {
-    color: $text-tertiary;
+    color: #999999;
   }
 }
 
 .send-btn {
-  width: 56rpx;
-  height: 56rpx;
+  background: #d9d9d9;
+  border-radius: 8rpx;
+  padding: 0 32rpx;
+  height: 72rpx;
   @include flex-center;
-  border-radius: $radius-round;
-  background: $text-disabled;
-  transition: all $duration-base $ease-apple;
+  flex-shrink: 0;
+  transition: all $duration-fast $ease-apple;
   
   &.active {
-    background: $primary-gradient;
-    box-shadow: $shadow-sm;
+    background: $primary;
     
     &:active {
-      transform: scale(0.9);
+      opacity: 0.8;
     }
   }
 }
 
-.send-icon {
-  font-size: $font-size-lg;
+.send-text {
+  font-size: 28rpx;
   color: #ffffff;
-  font-weight: $font-weight-bold;
+  font-weight: $font-weight-medium;
+  white-space: nowrap;
 }
 
 // ============================================

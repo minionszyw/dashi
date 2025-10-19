@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     OPENAI_MAX_TOKENS: int = Field(default=2000, env="OPENAI_MAX_TOKENS")
     
     # 业务配置
-    INITIAL_TOKEN_BALANCE: int = Field(default=100, env="INITIAL_TOKEN_BALANCE")
+    INITIAL_TOKEN_BALANCE: int = Field(default=10000, env="INITIAL_TOKEN_BALANCE")  # 单位：分
     TOKEN_PRICE_RATE: float = Field(default=0.01, env="TOKEN_PRICE_RATE")
     
     # 安全配置

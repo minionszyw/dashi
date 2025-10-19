@@ -20,9 +20,8 @@
 			"path": "pages/session/index",
 			"style": {
 				"navigationBarTitleText": "会话",
-				"backgroundColor": "#f7f8fa",
-				"navigationBarBackgroundColor": "#ffffff",
-				"navigationBarTextStyle": "black"
+				"navigationStyle": "custom",
+				"backgroundColor": "#f7f8fa"
 			}
 		},
 		{
@@ -69,6 +68,24 @@
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
+		},
+		{
+			"path": "pages/profile/edit",
+			"style": {
+				"navigationBarTitleText": "编辑资料",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/profile/settings",
+			"style": {
+				"navigationBarTitleText": "系统设置",
+				"backgroundColor": "#f7f8fa",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
 		}
 	],
 	"tabBar": {
@@ -102,9 +119,7 @@
 		"navigationBarTitleText": "大师AI命理",
 		"navigationBarBackgroundColor": "#ffffff",
 		"backgroundColor": "#f7f8fa",
-		"enablePullDownRefresh": false,
-		"rpxCalcMaxDeviceWidth": 960,
-		"rpxCalcBaseDeviceWidth": 375
+		"enablePullDownRefresh": false
 	},
 	"easycom": {
 		"autoscan": true,

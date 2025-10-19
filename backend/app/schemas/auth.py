@@ -21,3 +21,9 @@ class WxLoginResponse(BaseModel):
     user: dict
     is_new_user: bool = Field(default=False, description="是否新用户")
 
+
+class UpdateUserRequest(BaseModel):
+    """更新用户信息请求"""
+    nickname: str | None = Field(None, description="昵称")
+    avatar_url: str | None = Field(None, description="头像URL")
+

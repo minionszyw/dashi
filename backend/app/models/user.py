@@ -19,7 +19,7 @@ class User(Base):
     avatar_url = Column(Text)
     gender = Column(String(10))
     birth_info = Column(JSONB, comment="出生信息")
-    token_balance = Column(Integer, default=100, nullable=False, comment="Token余额")
+    token_balance = Column(Integer, default=10000, nullable=False, comment="Token余额（单位：分）")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     

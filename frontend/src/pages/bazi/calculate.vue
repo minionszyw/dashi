@@ -74,6 +74,8 @@ const formData = ref({
   current_city: ''
 })
 
+let hasSelectedTime = false
+
 const loading = ref(false)
 
 const genderOptions = [
@@ -105,8 +107,9 @@ function handleDateChange(e: any) {
 
 function handleTimeChange(e: any) {
   const [hour, minute] = e.detail.value.split(':')
-  formData.value.hour = parseInt(hour)
-  formData.value.minute = parseInt(minute)
+  formData.value.hour = parseInt(hour) || 0
+  formData.value.minute = parseInt(minute) || 0
+  hasSelectedTime = true
 }
 
 async function handleSubmit() {
@@ -115,8 +118,12 @@ async function handleSubmit() {
     uni.showToast({ title: '请输入姓名', icon: 'none' })
     return
   }
-  if (!formData.value.year) {
+  if (!formData.value.year || !formData.value.month || !formData.value.day) {
     uni.showToast({ title: '请选择出生日期', icon: 'none' })
+    return
+  }
+  if (!hasSelectedTime) {
+    uni.showToast({ title: '请选择出生时间', icon: 'none' })
     return
   }
   if (!formData.value.birth_city) {

@@ -1,29 +1,37 @@
 <template>
   <view :class="['message-bubble', message.role]">
-    <!-- AI消息 -->
+    <!-- AI消息（左侧） -->
     <template v-if="message.role === 'assistant'">
-      <view class="avatar emoji">🤖</view>
-      <view class="bubble-content">
-        <text class="content">{{ message.content }}</text>
-        <text class="time">{{ formatTime(message.created_at) }}</text>
+      <image class="avatar" src="/static/ai-avatar.svg" mode="aspectFill" />
+      <view class="bubble-wrapper">
+        <view class="bubble-content">
+          <text class="content">{{ message.content }}</text>
+        </view>
+        <text class="time">{{ formatMessageTime(message.created_at) }}</text>
       </view>
     </template>
 
-    <!-- 用户消息 -->
+    <!-- 用户消息（右侧） -->
     <template v-else>
-      <view class="bubble-content">
-        <text class="content">{{ message.content }}</text>
-        <text class="time">{{ formatTime(message.created_at) }}</text>
+      <view class="bubble-wrapper">
+        <view class="bubble-content">
+          <text class="content">{{ message.content }}</text>
+        </view>
+        <text class="time">{{ formatMessageTime(message.created_at) }}</text>
       </view>
-      <view class="avatar emoji">🧑</view>
+      <image 
+        class="avatar" 
+        :src="userStore.user?.avatar_url || '/static/default-avatar.svg'" 
+        mode="aspectFill" 
+      />
     </template>
   </view>
- </template>
+ </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Message } from '@/types'
-import { formatTime } from '@/utils/format'
+import { formatDateTime } from '@/utils/format'
 import { useUserStore } from '@/stores'
 
 interface Props {
@@ -34,32 +42,71 @@ const props = defineProps<Props>()
 
 const userStore = useUserStore()
 
-// 使用表情占位，避免本地静态资源路径在小程序下 500
-const userAvatar = computed(() => userStore.user?.avatar_url || '')
+// 格式化消息时间（微信样式：仅显示时分）
+function formatMessageTime(timestamp: string): string {
+  const now = new Date()
+  const msgDate = new Date(timestamp)
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const msgDay = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate())
+  
+  const diffDays = Math.floor((today.getTime() - msgDay.getTime()) / (24 * 60 * 60 * 1000))
+  
+  if (diffDays === 0) {
+    // 今天：只显示时间
+    return formatDateTime(timestamp, 'HH:mm')
+  } else if (diffDays === 1) {
+    // 昨天
+    return '昨天 ' + formatDateTime(timestamp, 'HH:mm')
+  } else if (diffDays < 7) {
+    // 一周内：显示星期
+    const weekDays = ['日', '一', '二', '三', '四', '五', '六']
+    return '星期' + weekDays[msgDate.getDay()] + ' ' + formatDateTime(timestamp, 'HH:mm')
+  } else {
+    // 更早：显示日期
+    return formatDateTime(timestamp, 'MM-DD HH:mm')
+  }
+}
 </script>
 
 <style scoped lang="scss">
 @import '@/styles/mixins.scss';
+@import '@/styles/variables.scss';
 
 .message-bubble {
   display: flex;
   align-items: flex-start;
-  margin: 24rpx 32rpx;
+  margin-bottom: $spacing-lg;
   animation: fadeIn 0.3s ease;
 
+  // 用户消息（右侧）
   &.user {
-    flex-direction: row-reverse;
+    justify-content: flex-end;
+
+    .bubble-wrapper {
+      align-items: flex-end;
+      margin-left: $spacing-md;
+    }
 
     .bubble-content {
       background: #95ec69;
-      margin-right: 20rpx;
+      border-radius: 10rpx 2rpx 10rpx 10rpx;
+    }
+
+    .time {
+      text-align: right;
     }
   }
 
+  // AI消息（左侧）
   &.assistant {
+    .bubble-wrapper {
+      align-items: flex-start;
+      margin-left: $spacing-md;
+    }
+
     .bubble-content {
       background: #ffffff;
-      margin-left: 20rpx;
+      border-radius: 2rpx 10rpx 10rpx 10rpx;
     }
   }
 }
@@ -69,35 +116,33 @@ const userAvatar = computed(() => userStore.user?.avatar_url || '')
   height: 80rpx;
   border-radius: 10rpx;
   flex-shrink: 0;
+  background: #f0f2f5;
 }
 
-.emoji {
-  @include flex-center;
-  background: #f0f2f5;
-  font-size: 40rpx;
+.bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 500rpx;
+  gap: $spacing-xs;
 }
 
 .bubble-content {
-  max-width: 500rpx;
   padding: 20rpx 24rpx;
-  border-radius: 10rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
 }
 
 .content {
   font-size: 30rpx;
   line-height: 1.6;
-  word-break: break-all;
+  color: $text-primary;
+  word-break: break-word;
   white-space: pre-wrap;
 }
 
 .time {
-  font-size: 22rpx;
-  color: #999;
-  margin-top: 12rpx;
-  align-self: flex-end;
+  font-size: 20rpx;
+  color: $text-tertiary;
+  padding: 0 $spacing-sm;
 }
 
 @keyframes fadeIn {
