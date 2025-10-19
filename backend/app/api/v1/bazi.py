@@ -25,7 +25,12 @@ async def calculate_bazi(
     """
     计算八字并保存档案
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
+        logger.info(f"收到八字计算请求: user={current_user.id}, data={request.model_dump()}")
+        
         # 计算八字
         bazi_result = bazi_service.calculate(
             name=request.name,
@@ -40,6 +45,8 @@ async def calculate_bazi(
             current_city=request.current_city
         )
         
+        logger.info(f"八字计算成功: {request.name}")
+        
         # 保存档案
         profile = BaziProfile(
             user_id=current_user.id,
@@ -52,9 +59,12 @@ async def calculate_bazi(
         db.commit()
         db.refresh(profile)
         
+        logger.info(f"八字档案保存成功: profile_id={profile.id}")
         return profile
         
     except Exception as e:
+        logger.error(f"八字计算失败: {type(e).__name__}: {str(e)}", exc_info=True)
+        db.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"八字计算失败：{str(e)}"

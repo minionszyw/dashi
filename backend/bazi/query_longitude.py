@@ -5,7 +5,12 @@ def load_region_data():
     """
     加载region.json数据
     """
-    with open('region.json', 'r', encoding='utf-8') as f:
+    import os
+    # 获取当前文件所在目录
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    region_file = os.path.join(current_dir, 'region.json')
+    
+    with open(region_file, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def fuzzy_match(city_name, target_name):

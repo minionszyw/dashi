@@ -84,6 +84,7 @@
 
 // 主按钮
 @mixin btn-primary {
+  @include flex-center;
   background: $primary-gradient;
   color: #ffffff;
   border-radius: $radius-round;
@@ -103,6 +104,7 @@
 
 // 次要按钮
 @mixin btn-secondary {
+  @include flex-center;
   background: $bg-card;
   color: $text-primary;
   border: 2rpx solid $border-color;

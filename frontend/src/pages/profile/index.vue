@@ -5,7 +5,7 @@
       <view class="user-card">
         <view class="user-header">
           <image 
-            :src="userStore.user?.avatar_url || '/static/default-avatar.svg'" 
+            :src="userStore.user?.avatar_url || 'https://img.icons8.com/color/96/user.png'" 
             class="avatar"
             mode="aspectFill"
           />
@@ -157,22 +157,17 @@ function handleRecharge() {
 }
 
 function handleBazi() {
-  // 如果已有八字，跳转到列表；否则跳转到排盘
-  if (baziCount.value > 0) {
+  // 如果已有八字，跳转到结果页；否则提示去编辑页设置
+  if (baziCount.value > 0 && baziStore.profiles.length > 0) {
+    // 跳转到第一个八字档案的结果页
     uni.navigateTo({
-      url: '/pages/bazi/list'
+      url: `/pages/bazi/result?id=${baziStore.profiles[0].id}`
     })
   } else {
     uni.showModal({
-      title: '八字排盘',
-      content: '您还没有设置八字信息，是否现在设置？',
-      success: (res) => {
-        if (res.confirm) {
-          uni.navigateTo({
-            url: '/pages/bazi/calculate'
-          })
-        }
-      }
+      title: '提示',
+      content: '您还没有设置八字信息，请前往"编辑资料"页面设置',
+      showCancel: false
     })
   }
 }

@@ -28,6 +28,9 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
     }
   }
 
+  // 开发环境打印请求信息
+  console.log('🚀 API请求:', method, url, data)
+
   return new Promise((resolve, reject) => {
     uni.request({
       url: `${BASE_URL}${url}`,
@@ -38,10 +41,12 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
         ...header
       },
       success: (res) => {
+        console.log('📥 API响应:', res.statusCode, url, res.data)
+        
         if (res.statusCode === 200) {
           resolve(res.data as T)
-        } else if (res.statusCode === 401) {
-          // Token过期，跳转登录
+        } else if (res.statusCode === 401 || res.statusCode === 403) {
+          // Token过期或未认证，跳转登录
           storage.clear()
           uni.reLaunch({
             url: '/pages/login/index'
@@ -63,15 +68,19 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
           })
           reject(new Error('Token余额不足'))
         } else {
-          const errorMsg = (res.data as any)?.message || '请求失败'
+          // 尝试从响应中提取错误信息
+          const errorMsg = (res.data as any)?.detail || (res.data as any)?.message || '请求失败'
+          console.error('❌ API错误:', res.statusCode, errorMsg, res.data)
           uni.showToast({
             title: errorMsg,
-            icon: 'none'
+            icon: 'none',
+            duration: 3000
           })
           reject(new Error(errorMsg))
         }
       },
       fail: (err) => {
+        console.error('❌ 网络错误:', err)
         uni.showToast({
           title: '网络错误',
           icon: 'none'

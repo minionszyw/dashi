@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     # 日志配置
     LOG_LEVEL: str = Field(default="INFO", env="LOG_LEVEL")
     
+    # API配置
+    API_BASE_URL: str = Field(default="http://localhost:8000", env="API_BASE_URL")
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

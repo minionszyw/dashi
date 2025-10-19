@@ -65,7 +65,12 @@ export const useBaziStore = defineStore('bazi', () => {
   }) {
     try {
       loading.value = true
-      const profile = await calculateBazi(data)
+      // 清理空字符串，后端期望null或不传
+      const cleanData = { ...data }
+      if (cleanData.current_city === '') {
+        delete cleanData.current_city
+      }
+      const profile = await calculateBazi(cleanData)
       profiles.value.unshift(profile)
       currentProfile.value = profile
       return profile
