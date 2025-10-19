@@ -28,6 +28,7 @@ class UserUpdate(UserBase):
 class UserResponse(UserBase):
     """用户响应模型"""
     id: UUID
+    openid: str
     token_balance: int
     created_at: datetime
     

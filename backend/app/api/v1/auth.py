@@ -53,8 +53,8 @@ async def wx_login(
             user={
                 "id": str(user.id),
                 "openid": user.openid,
-                "nickname": user.nickname,
-                "avatar_url": user.avatar_url,
+                "nickname": user.nickname or "新用户",
+                "avatar_url": user.avatar_url or "",
                 "token_balance": user.token_balance
             },
             is_new_user=is_new_user
