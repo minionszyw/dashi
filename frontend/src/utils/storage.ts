@@ -7,6 +7,33 @@ const USER_KEY = 'user_info'
 
 export const storage = {
   /**
+   * 通用存储方法
+   */
+  set(key: string, value: any) {
+    uni.setStorageSync(key, JSON.stringify(value))
+  },
+
+  /**
+   * 通用获取方法
+   */
+  get<T>(key: string): T | null {
+    const value = uni.getStorageSync(key)
+    if (!value) return null
+    try {
+      return JSON.parse(value) as T
+    } catch {
+      return value as T
+    }
+  },
+
+  /**
+   * 通用移除方法
+   */
+  remove(key: string) {
+    uni.removeStorageSync(key)
+  },
+
+  /**
    * 保存Token
    */
   setToken(token: string) {

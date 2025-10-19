@@ -61,6 +61,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useChatStore } from '@/stores'
 import { storage } from '@/utils/storage'
+import { updateConversation } from '@/api'
 
 const chatStore = useChatStore()
 
@@ -110,10 +111,17 @@ async function handleSave() {
     
     // 如果有当前会话，更新会话设置
     if (chatStore.currentConversation) {
-      await chatStore.updateConversationTitle(
-        chatStore.currentConversation.id,
-        chatStore.currentConversation.title
-      )
+      const updated = await updateConversation(chatStore.currentConversation.id, {
+        context_size: contextSize.value,
+        ai_style: aiStyle.value
+      })
+      
+      // 更新 store 中的会话数据
+      chatStore.currentConversation = updated
+      const index = chatStore.conversations.findIndex(c => c.id === updated.id)
+      if (index !== -1) {
+        chatStore.conversations[index] = updated
+      }
     }
     
     uni.showToast({
