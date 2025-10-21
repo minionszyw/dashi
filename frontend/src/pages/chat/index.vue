@@ -1,15 +1,13 @@
 <template>
   <view class="chat-page">
-    <!-- 自定义导航栏 -->
-    <view class="navbar">
-      <view class="navbar-content">
-        <view class="navbar-left">
-          <text class="navbar-title">{{ chatStore.currentConversation?.title || 'AI对话' }}</text>
-          <text class="navbar-subtitle" v-if="userStore.user">
-            剩余 {{ userStore.user.token_balance }} Token
-          </text>
+    <!-- 自定义导航栏（对齐胶囊按钮） -->
+    <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px' }">
+      <view class="navbar-content" :style="{ height: navBarHeight + 'px' }">
+        <view class="navbar-left" @click="goBack">
+          <text class="back-icon">‹</text>
         </view>
-        <view class="navbar-right">
+        <text class="navbar-title">{{ chatStore.currentConversation?.title || '新会话' }}</text>
+        <view class="navbar-right" :style="{ width: menuButtonWidth + 'px' }">
           <view class="icon-button" @click="handleMore">
             <text class="icon">⋮</text>
           </view>
@@ -21,6 +19,7 @@
     <scroll-view
       scroll-y
       class="message-list"
+      :style="{ paddingTop: (statusBarHeight + navBarHeight) + 'px' }"
       :scroll-into-view="scrollToView"
       :scroll-with-animation="true"
       :enhanced="true"
@@ -136,6 +135,10 @@ const scrollToView = ref('')
 const isAITyping = ref(false)
 const menuPopup = ref()
 const isInputFocused = ref(false)
+// 导航栏相关
+const statusBarHeight = ref(0) // 状态栏高度
+const navBarHeight = ref(44) // 导航栏内容高度
+const menuButtonWidth = ref(87) // 胶囊按钮区域宽度
 
 // 快速问题
 const quickQuestions = [
@@ -159,17 +162,35 @@ onMounted(async () => {
     return
   }
 
-  // 加载会话列表
-  await chatStore.loadConversations()
-
-  // 加载最近会话或创建新会话
-  if (chatStore.conversations.length > 0) {
-    await chatStore.switchConversation(chatStore.conversations[0].id)
-  } else {
-    await chatStore.newConversation()
+  // 获取系统信息和胶囊按钮位置（微信小程序）
+  // #ifdef MP-WEIXIN
+  try {
+    const systemInfo = uni.getSystemInfoSync()
+    const menuButtonInfo = uni.getMenuButtonBoundingClientRect()
+    
+    // 状态栏高度
+    statusBarHeight.value = systemInfo.statusBarHeight || 0
+    
+    // 导航栏内容高度（胶囊按钮高度 + 上下间距）
+    navBarHeight.value = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight.value) * 2
+    
+    // 胶囊按钮区域宽度（屏幕宽度 - 胶囊左边距）
+    menuButtonWidth.value = systemInfo.windowWidth - menuButtonInfo.left
+  } catch (e) {
+    console.error('获取胶囊位置失败:', e)
   }
+  // #endif
+  
+  // #ifndef MP-WEIXIN
+  // 非微信小程序环境使用默认值
+  const systemInfo = uni.getSystemInfoSync()
+  statusBarHeight.value = systemInfo.statusBarHeight || 20
+  // #endif
 
-  scrollToBottom()
+  // 加载会话（如果有当前会话）
+  if (chatStore.currentConversation) {
+    scrollToBottom()
+  }
 })
 
 // 发送消息
@@ -185,6 +206,9 @@ async function handleSend() {
     return
   }
 
+  const conversationId = chatStore.currentConversation.id
+  const isFirstMessage = chatStore.messages.length === 0
+
   // 清空输入框
   inputText.value = ''
 
@@ -199,6 +223,9 @@ async function handleSend() {
   try {
     // 调用流式API
     await streamChat(text, aiMessage.id)
+    
+    // 更新会话预览缓存
+    updateConversationPreview(conversationId, text, isFirstMessage)
   } catch (error: any) {
     console.error('发送消息失败:', error)
     uni.showToast({
@@ -210,6 +237,37 @@ async function handleSend() {
   } finally {
     isAITyping.value = false
   }
+}
+
+// 更新会话预览缓存
+function updateConversationPreview(conversationId: string, userMessage: string, isFirst: boolean) {
+  const cached = storage.get<Record<string, { preview: string, firstQuestion: string }>>('conversation_previews') || {}
+  
+  if (!cached[conversationId]) {
+    cached[conversationId] = {
+      preview: '',
+      firstQuestion: ''
+    }
+  }
+  
+  // 如果是第一条消息或之前没有记录firstQuestion，记录为标题
+  if (isFirst || !cached[conversationId].firstQuestion) {
+    const truncatedQuestion = userMessage.length > 20 
+      ? userMessage.substring(0, 20) + '...' 
+      : userMessage
+    cached[conversationId].firstQuestion = truncatedQuestion
+    console.log('✅ 更新会话标题:', conversationId, truncatedQuestion)
+  }
+  
+  // 更新预览（最新的用户消息）
+  const truncatedPreview = userMessage.length > 30 
+    ? userMessage.substring(0, 30) + '...' 
+    : userMessage
+  cached[conversationId].preview = truncatedPreview
+  console.log('✅ 更新会话预览:', conversationId, truncatedPreview)
+  
+  // 保存到本地存储
+  storage.set('conversation_previews', cached)
 }
 
 // 快速问题
@@ -370,7 +428,12 @@ async function handleClearChat() {
   })
 }
 
-// 其他功能预留位（已移除选择八字与导出）
+// 返回上一页
+function goBack() {
+  uni.navigateBack({
+    delta: 1
+  })
+}
 
 // 滚动到底部
 function scrollToBottom() {
@@ -391,64 +454,86 @@ function scrollToBottom() {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: $bg-page;
+  background: #ededed;
 }
 
 // ============================================
-// 导航栏
+// 导航栏（微信风格，对齐胶囊按钮）
 // ============================================
 
 .navbar {
-  background: $bg-card;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
   border-bottom: 1rpx solid $border-color;
-  padding-top: env(safe-area-inset-top);
   z-index: 100;
 }
 
 .navbar-content {
-  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 0 $spacing-base;
-  @include flex-between;
+  position: relative;
 }
 
 .navbar-left {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 80rpx;
+  flex-shrink: 0;
+  z-index: 1;
+  
+  &:active {
+    opacity: 0.7;
+  }
+}
+
+.back-icon {
+  font-size: 48rpx;
+  color: $text-primary;
+  font-weight: 300;
+  line-height: 1;
+  margin-top: -4rpx;
 }
 
 .navbar-title {
-  display: block;
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32rpx;
+  font-weight: $font-weight-medium;
   color: $text-primary;
+  white-space: nowrap;
+  max-width: 400rpx;
   @include ellipsis;
 }
 
-.navbar-subtitle {
-  display: block;
-  font-size: $font-size-xs;
-  color: $text-tertiary;
-  margin-top: 4rpx;
-}
-
 .navbar-right {
-  margin-left: $spacing-base;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .icon-button {
-  width: 64rpx;
-  height: 64rpx;
+  width: 60rpx;
+  height: 60rpx;
   @include flex-center;
   border-radius: $radius-base;
   transition: all $duration-fast $ease-apple;
   
   &:active {
-    background: $bg-hover;
+    background: rgba(0, 0, 0, 0.05);
   }
 }
 
 .icon {
-  font-size: $font-size-xl;
-  color: $text-secondary;
+  font-size: 36rpx;
+  color: $text-primary;
+  font-weight: $font-weight-bold;
 }
 
 // ============================================

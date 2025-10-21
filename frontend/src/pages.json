@@ -95,12 +95,6 @@
 		"borderStyle": "white",
 		"list": [
 			{
-				"pagePath": "pages/chat/index",
-				"text": "对话",
-				"iconPath": "static/tabbar/chat.png",
-				"selectedIconPath": "static/tabbar/chat-active.png"
-			},
-			{
 				"pagePath": "pages/session/index",
 				"text": "会话",
 				"iconPath": "static/tabbar/session.png",

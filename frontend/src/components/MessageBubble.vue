@@ -84,7 +84,7 @@ function formatMessageTime(timestamp: string): string {
 
     .bubble-wrapper {
       align-items: flex-end;
-      margin-left: $spacing-md;
+      margin-right: $spacing-md;
     }
 
     .bubble-content {

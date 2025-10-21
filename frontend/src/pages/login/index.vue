@@ -126,8 +126,8 @@ async function handleGetUserInfo(e: any) {
 }
 
 function navigateToHome() {
-  uni.reLaunch({
-    url: '/pages/chat/index'
+  uni.switchTab({
+    url: '/pages/session/index'
   })
 }
 
@@ -283,9 +283,10 @@ function handleTerms() {
 }
 
 .wechat-icon {
-  width: 40rpx;
-  height: 40rpx;
-  margin-right: $spacing-sm;
+  width: 48rpx;
+  height: 48rpx;
+  margin-right: $spacing-base;
+  flex-shrink: 0;
 }
 
 .button-text {
