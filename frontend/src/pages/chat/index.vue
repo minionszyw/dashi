@@ -63,21 +63,6 @@
           <MessageBubble :message="message" />
         </view>
 
-        <!-- AI正在输入... -->
-        <view v-if="isAITyping" class="typing-wrapper">
-          <view class="typing-indicator">
-            <view class="typing-avatar">
-              <text class="avatar-icon">🤖</text>
-            </view>
-            <view class="typing-bubble">
-              <view class="typing-dots">
-                <view class="dot" />
-                <view class="dot" />
-                <view class="dot" />
-              </view>
-            </view>
-          </view>
-        </view>
       </view>
     </scroll-view>
 
@@ -552,72 +537,6 @@ function scrollToBottom() {
 .quick-text {
   font-size: $font-size-base;
   color: $text-primary;
-}
-
-// ============================================
-// AI输入指示器
-// ============================================
-
-.typing-wrapper {
-  animation: fadeIn $duration-base $ease-apple;
-}
-
-.typing-indicator {
-  @include flex-center-y;
-  gap: $spacing-md;
-}
-
-.typing-avatar {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: $radius-round;
-  background: $primary-gradient;
-  @include flex-center;
-  flex-shrink: 0;
-}
-
-.avatar-icon {
-  font-size: $font-size-lg;
-}
-
-.typing-bubble {
-  background: $bg-card;
-  border-radius: $radius-lg;
-  padding: $spacing-base $spacing-lg;
-  box-shadow: $shadow-xs;
-}
-
-.typing-dots {
-  display: flex;
-  gap: 8rpx;
-  align-items: center;
-}
-
-.dot {
-  width: 12rpx;
-  height: 12rpx;
-  border-radius: $radius-round;
-  background: $text-tertiary;
-  animation: bounce 1.4s infinite ease-in-out both;
-
-  &:nth-child(1) {
-    animation-delay: -0.32s;
-  }
-
-  &:nth-child(2) {
-    animation-delay: -0.16s;
-  }
-}
-
-@keyframes bounce {
-  0%, 80%, 100% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 // ============================================

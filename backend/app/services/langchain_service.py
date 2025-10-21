@@ -2,7 +2,7 @@
 LangChain AI对话服务
 """
 import json
-from typing import AsyncGenerator, Dict
+from typing import AsyncGenerator, Dict, Optional
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import HumanMessage, AIMessage, SystemMessage
@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.models.conversation import Conversation
 from app.models.message import Message
 from app.models.bazi_profile import BaziProfile
+from app.prompts import SystemPromptManager
 
 
 class LangChainChatService:
@@ -27,29 +28,25 @@ class LangChainChatService:
             openai_api_key=settings.OPENAI_API_KEY
         )
     
-    def _build_system_prompt(self, bazi_info: Dict = None) -> str:
-        """构建系统提示词"""
-        base_prompt = """你是一位专业的命理分析师，精通八字命理。
-
-请根据用户的问题进行专业分析。注意：
-1. 分析要有理有据，引用命理术语
-2. 语言要专业且易懂
-3. 回答要有实用性建议
-4. 保持命理文化的严肃性
-"""
+    def _build_system_prompt(
+        self,
+        ai_style: str = "professional",
+        bazi_info: Optional[Dict] = None
+    ) -> str:
+        """
+        构建系统提示词
         
-        if bazi_info:
-            bazi_section = f"""
-用户档案：
-- 姓名：{bazi_info.get('name', '未知')}
-- 性别：{bazi_info.get('gender', '未知')}
-- 八字：{bazi_info.get('bazi', '未知')}
-- 节气信息：{bazi_info.get('jieqi_info', '未知')}
-- 大运信息：{bazi_info.get('dayun_info', '未知')}
-"""
-            return base_prompt + bazi_section
-        
-        return base_prompt
+        Args:
+            ai_style: AI对话风格 (simple/balanced/professional)
+            bazi_info: 八字档案信息（包含name, gender和bazi_result中的数据）
+            
+        Returns:
+            完整的系统提示词
+        """
+        return SystemPromptManager.build_system_prompt(
+            ai_style=ai_style,
+            bazi_info=bazi_info
+        )
     
     def _load_context_messages(
         self,
@@ -91,22 +88,50 @@ class LangChainChatService:
         Yields:
             消息块字典
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         # 获取会话信息
         conversation = db.query(Conversation).filter(
             Conversation.id == conversation_id
         ).first()
         
+        logger.info(f"📌 会话ID: {conversation_id}")
+        logger.info(f"🎨 对话模式: {conversation.ai_style}")
+        logger.info(f"📊 上下文条数: {conversation.context_size}")
+        logger.info(f"🔗 关联八字档案ID: {conversation.bazi_profile_id}")
+        
+        # 获取AI对话风格
+        ai_style = conversation.ai_style or "professional"
+        
         # 获取八字信息（如果有）
         bazi_info = None
         if conversation.bazi_profile_id:
+            logger.info(f"🔍 正在查询八字档案: {conversation.bazi_profile_id}")
             profile = db.query(BaziProfile).filter(
                 BaziProfile.id == conversation.bazi_profile_id
             ).first()
+            
             if profile:
-                bazi_info = profile.bazi_result
+                # 组合八字档案的完整信息
+                bazi_info = {
+                    'name': profile.name,
+                    'gender': profile.gender,
+                    # 从bazi_result字段获取八字分析数据
+                    **(profile.bazi_result or {})
+                }
+                logger.info(f"✅ 八字档案加载成功: {profile.name} ({profile.gender})")
+                logger.info(f"   八字字段: {list(profile.bazi_result.keys()) if profile.bazi_result else '无'}")
+            else:
+                logger.warning(f"⚠️ 未找到八字档案: {conversation.bazi_profile_id}")
+        else:
+            logger.info("ℹ️ 当前会话未关联八字档案")
         
-        # 构建系统提示
-        system_prompt = self._build_system_prompt(bazi_info)
+        # 构建系统提示（传入ai_style和完整的bazi_info）
+        system_prompt = self._build_system_prompt(
+            ai_style=ai_style,
+            bazi_info=bazi_info
+        )
         
         # 加载上下文
         context_messages = self._load_context_messages(

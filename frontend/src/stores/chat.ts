@@ -10,8 +10,10 @@ import {
   createConversation,
   updateConversation,
   deleteConversation as deleteConversationApi,
-  getChatHistory
+  getChatHistory,
+  getBaziProfiles
 } from '@/api'
+import { storage } from '@/utils/storage'
 
 export const useChatStore = defineStore('chat', () => {
   // 状态
@@ -37,12 +39,53 @@ export const useChatStore = defineStore('chat', () => {
 
   /**
    * 创建新会话
+   * 自动关联用户最近的八字档案，并应用默认的AI设置
    */
   async function newConversation(data?: {
     title?: string
     bazi_profile_id?: string
+    context_size?: number
+    ai_style?: string
   }) {
     try {
+      // 读取用户保存的默认AI设置
+      const savedSettings = storage.get<any>('ai_settings')
+      if (savedSettings) {
+        data = {
+          ...data,
+          context_size: data?.context_size || savedSettings.contextSize || 10,
+          ai_style: data?.ai_style || savedSettings.aiStyle || 'balanced'
+        }
+        console.log('✅ 应用用户AI设置:', `对话模式=${data.ai_style}, 上下文=${data.context_size}条`)
+      } else {
+        // 如果没有保存的设置，使用默认值
+        data = {
+          ...data,
+          context_size: data?.context_size || 10,
+          ai_style: data?.ai_style || 'balanced'
+        }
+        console.log('✅ 应用默认AI设置: 对话模式=balanced, 上下文=10条')
+      }
+      
+      // 如果没有指定八字档案，自动获取用户最近的八字档案
+      if (!data?.bazi_profile_id) {
+        try {
+          const profiles = await getBaziProfiles()
+          if (profiles && profiles.length > 0) {
+            // 使用最近的八字档案（第一个）
+            data = {
+              ...data,
+              bazi_profile_id: profiles[0].id
+            }
+            console.log('✅ 自动关联八字档案:', profiles[0].name, profiles[0].id)
+          } else {
+            console.log('ℹ️ 用户暂无八字档案')
+          }
+        } catch (e) {
+          console.warn('⚠️ 获取八字档案失败，创建普通会话:', e)
+        }
+      }
+      
       const conversation = await createConversation(data || {})
       conversations.value.unshift(conversation)
       currentConversation.value = conversation

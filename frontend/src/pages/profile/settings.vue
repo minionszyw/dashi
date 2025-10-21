@@ -66,7 +66,7 @@ import { updateConversation } from '@/api'
 const chatStore = useChatStore()
 
 const contextSize = ref(10)
-const aiStyle = ref('professional')
+const aiStyle = ref('balanced')
 
 const modes = [
   { value: 'simple', label: '简单', icon: '📝', desc: '简明扼要，快速回答' },
@@ -82,13 +82,13 @@ onMounted(() => {
   // 从当前会话或存储加载设置
   if (chatStore.currentConversation) {
     contextSize.value = chatStore.currentConversation.context_size || 10
-    aiStyle.value = chatStore.currentConversation.ai_style || 'professional'
+    aiStyle.value = chatStore.currentConversation.ai_style || 'balanced'
   } else {
     // 从本地存储加载默认设置
     const savedSettings = storage.get<any>('ai_settings')
     if (savedSettings) {
       contextSize.value = savedSettings.contextSize || 10
-      aiStyle.value = savedSettings.aiStyle || 'professional'
+      aiStyle.value = savedSettings.aiStyle || 'balanced'
     }
   }
 })

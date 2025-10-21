@@ -14,21 +14,6 @@
         <text class="app-slogan">专业命理分析 · 智能对话助手</text>
       </view>
       
-      <!-- 特性展示 -->
-      <view class="features fade-in-up">
-        <view class="feature-item">
-          <view class="feature-icon">✨</view>
-          <text class="feature-text">AI智能分析</text>
-        </view>
-        <view class="feature-item">
-          <view class="feature-icon">🎯</view>
-          <text class="feature-text">专业八字排盘</text>
-        </view>
-        <view class="feature-item">
-          <view class="feature-icon">💬</view>
-          <text class="feature-text">实时对话咨询</text>
-        </view>
-      </view>
     </view>
     
     <!-- 底部登录区 -->
@@ -252,42 +237,6 @@ function handleTerms() {
 .app-slogan {
   display: block;
   font-size: $font-size-base;
-  color: $text-secondary;
-  font-weight: $font-weight-medium;
-}
-
-// ============================================
-// 特性展示
-// ============================================
-
-.features {
-  display: flex;
-  gap: $spacing-lg;
-  padding: 0 $spacing-base;
-  animation-delay: 0.1s;
-}
-
-.feature-item {
-  flex: 1;
-  @include card;
-  padding: $spacing-lg $spacing-base;
-  text-align: center;
-  transition: all $duration-base $ease-apple;
-  
-  &:active {
-    transform: translateY(-4rpx);
-    box-shadow: $shadow-md;
-  }
-}
-
-.feature-icon {
-  font-size: 48rpx;
-  margin-bottom: $spacing-sm;
-}
-
-.feature-text {
-  display: block;
-  font-size: $font-size-sm;
   color: $text-secondary;
   font-weight: $font-weight-medium;
 }
