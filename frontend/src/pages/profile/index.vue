@@ -152,7 +152,7 @@ function handleEditProfile() {
 
 function handleRecharge() {
   uni.navigateTo({
-    url: '/pages/recharge/index'
+    url: '/pages/profile/recharge'
   })
 }
 
@@ -161,7 +161,7 @@ function handleBazi() {
   if (baziCount.value > 0 && baziStore.profiles.length > 0) {
     // 跳转到第一个八字档案的结果页
     uni.navigateTo({
-      url: `/pages/bazi/result?id=${baziStore.profiles[0].id}`
+      url: `/pages/profile/bazi?id=${baziStore.profiles[0].id}`
     })
   } else {
     uni.showModal({

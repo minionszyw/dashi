@@ -191,4 +191,3 @@ function handleBack() {
   font-size: $font-size-lg;
 }
 </style>
-

@@ -61,7 +61,7 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
             success: (res) => {
               if (res.confirm) {
                 uni.navigateTo({
-                  url: '/pages/recharge/index'
+                  url: '/pages/profile/recharge'
                 })
               }
             }

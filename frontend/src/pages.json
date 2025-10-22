@@ -35,16 +35,7 @@
 		}
 	},
 		{
-			"path": "pages/bazi/calculate",
-			"style": {
-				"navigationBarTitleText": "八字排盘",
-				"backgroundColor": "#f7f8fa",
-				"navigationBarBackgroundColor": "#ffffff",
-				"navigationBarTextStyle": "black"
-			}
-		},
-		{
-			"path": "pages/bazi/result",
+			"path": "pages/profile/bazi",
 			"style": {
 				"navigationBarTitleText": "排盘结果",
 				"backgroundColor": "#f7f8fa",
@@ -53,16 +44,7 @@
 			}
 		},
 		{
-			"path": "pages/bazi/list",
-			"style": {
-				"navigationBarTitleText": "八字档案",
-				"backgroundColor": "#f7f8fa",
-				"navigationBarBackgroundColor": "#ffffff",
-				"navigationBarTextStyle": "black"
-			}
-		},
-		{
-			"path": "pages/recharge/index",
+			"path": "pages/profile/recharge",
 			"style": {
 				"navigationBarTitleText": "充值中心",
 				"backgroundColor": "#f7f8fa",
