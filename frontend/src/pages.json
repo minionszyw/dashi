@@ -8,31 +8,32 @@
 				"backgroundColor": "#f7f8fa"
 			}
 		},
-		{
-			"path": "pages/chat/index",
-			"style": {
-				"navigationBarTitleText": "AI对话",
-				"navigationStyle": "custom",
-				"backgroundColor": "#f7f8fa"
-			}
-		},
-		{
-			"path": "pages/session/index",
-			"style": {
-				"navigationBarTitleText": "会话",
-				"navigationStyle": "custom",
-				"backgroundColor": "#f7f8fa"
-			}
-		},
-		{
-			"path": "pages/profile/index",
-			"style": {
-				"navigationBarTitleText": "我的",
-				"backgroundColor": "#f7f8fa",
-				"navigationBarBackgroundColor": "#ffffff",
-				"navigationBarTextStyle": "black"
-			}
-		},
+	{
+		"path": "pages/chat/index",
+		"style": {
+			"navigationBarTitleText": "AI对话",
+			"backgroundColor": "#f7f8fa",
+			"navigationBarBackgroundColor": "#ffffff",
+			"navigationBarTextStyle": "black"
+		}
+	},
+	{
+		"path": "pages/session/index",
+		"style": {
+			"navigationBarTitleText": "会话",
+			"navigationStyle": "custom",
+			"backgroundColor": "#f7f8fa"
+		}
+	},
+	{
+		"path": "pages/profile/index",
+		"style": {
+			"navigationBarTitleText": "我的",
+			"backgroundColor": "#f7f8fa",
+			"navigationBarBackgroundColor": "#ffffff",
+			"navigationBarTextStyle": "black"
+		}
+	},
 		{
 			"path": "pages/bazi/calculate",
 			"style": {

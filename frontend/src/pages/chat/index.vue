@@ -1,25 +1,10 @@
 <template>
   <view class="chat-page">
-    <!-- 自定义导航栏（对齐胶囊按钮） -->
-    <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px' }">
-      <view class="navbar-content" :style="{ height: navBarHeight + 'px' }">
-        <view class="navbar-left" @click="goBack">
-          <text class="back-icon">‹</text>
-        </view>
-        <text class="navbar-title">{{ chatStore.currentConversation?.title || '新会话' }}</text>
-        <view class="navbar-right" :style="{ width: menuButtonWidth + 'px' }">
-          <view class="icon-button" @click="handleMore">
-            <text class="icon">⋮</text>
-          </view>
-        </view>
-      </view>
-    </view>
 
     <!-- 消息列表 -->
     <scroll-view
       scroll-y
       class="message-list"
-      :style="{ paddingTop: (statusBarHeight + navBarHeight) + 'px' }"
       :scroll-into-view="scrollToView"
       :scroll-with-animation="true"
       :enhanced="true"
@@ -135,10 +120,6 @@ const scrollToView = ref('')
 const isAITyping = ref(false)
 const menuPopup = ref()
 const isInputFocused = ref(false)
-// 导航栏相关
-const statusBarHeight = ref(0) // 状态栏高度
-const navBarHeight = ref(44) // 导航栏内容高度
-const menuButtonWidth = ref(87) // 胶囊按钮区域宽度
 
 // 快速问题
 const quickQuestions = [
@@ -161,31 +142,6 @@ onMounted(async () => {
     })
     return
   }
-
-  // 获取系统信息和胶囊按钮位置（微信小程序）
-  // #ifdef MP-WEIXIN
-  try {
-    const systemInfo = uni.getSystemInfoSync()
-    const menuButtonInfo = uni.getMenuButtonBoundingClientRect()
-    
-    // 状态栏高度
-    statusBarHeight.value = systemInfo.statusBarHeight || 0
-    
-    // 导航栏内容高度（胶囊按钮高度 + 上下间距）
-    navBarHeight.value = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight.value) * 2
-    
-    // 胶囊按钮区域宽度（屏幕宽度 - 胶囊左边距）
-    menuButtonWidth.value = systemInfo.windowWidth - menuButtonInfo.left
-  } catch (e) {
-    console.error('获取胶囊位置失败:', e)
-  }
-  // #endif
-  
-  // #ifndef MP-WEIXIN
-  // 非微信小程序环境使用默认值
-  const systemInfo = uni.getSystemInfoSync()
-  statusBarHeight.value = systemInfo.statusBarHeight || 20
-  // #endif
 
   // 加载会话（如果有当前会话）
   if (chatStore.currentConversation) {
@@ -252,19 +208,17 @@ function updateConversationPreview(conversationId: string, userMessage: string, 
   
   // 如果是第一条消息或之前没有记录firstQuestion，记录为标题
   if (isFirst || !cached[conversationId].firstQuestion) {
-    const truncatedQuestion = userMessage.length > 20 
-      ? userMessage.substring(0, 20) + '...' 
+    const truncatedQuestion = userMessage.length > 20
+      ? userMessage.substring(0, 20) + '...'
       : userMessage
     cached[conversationId].firstQuestion = truncatedQuestion
-    console.log('✅ 更新会话标题:', conversationId, truncatedQuestion)
   }
   
   // 更新预览（最新的用户消息）
-  const truncatedPreview = userMessage.length > 30 
-    ? userMessage.substring(0, 30) + '...' 
+  const truncatedPreview = userMessage.length > 30
+    ? userMessage.substring(0, 30) + '...'
     : userMessage
   cached[conversationId].preview = truncatedPreview
-  console.log('✅ 更新会话预览:', conversationId, truncatedPreview)
   
   // 保存到本地存储
   storage.set('conversation_previews', cached)
@@ -457,84 +411,6 @@ function scrollToBottom() {
   background: #ededed;
 }
 
-// ============================================
-// 导航栏（微信风格，对齐胶囊按钮）
-// ============================================
-
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border-bottom: 1rpx solid $border-color;
-  z-index: 100;
-}
-
-.navbar-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 $spacing-base;
-  position: relative;
-}
-
-.navbar-left {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 80rpx;
-  flex-shrink: 0;
-  z-index: 1;
-  
-  &:active {
-    opacity: 0.7;
-  }
-}
-
-.back-icon {
-  font-size: 48rpx;
-  color: $text-primary;
-  font-weight: 300;
-  line-height: 1;
-  margin-top: -4rpx;
-}
-
-.navbar-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 32rpx;
-  font-weight: $font-weight-medium;
-  color: $text-primary;
-  white-space: nowrap;
-  max-width: 400rpx;
-  @include ellipsis;
-}
-
-.navbar-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.icon-button {
-  width: 60rpx;
-  height: 60rpx;
-  @include flex-center;
-  border-radius: $radius-base;
-  transition: all $duration-fast $ease-apple;
-  
-  &:active {
-    background: rgba(0, 0, 0, 0.05);
-  }
-}
-
-.icon {
-  font-size: 36rpx;
-  color: $text-primary;
-  font-weight: $font-weight-bold;
-}
 
 // ============================================
 // 消息列表

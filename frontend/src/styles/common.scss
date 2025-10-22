@@ -173,6 +173,41 @@ button {
 .pb-xl { padding-bottom: $spacing-xl; }
 
 // ============================================
+// 导航栏
+// ============================================
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid $border-color;
+  z-index: 999;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $spacing-base;
+  position: relative;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80rpx;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+// ============================================
 // 动画
 // ============================================
 

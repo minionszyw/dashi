@@ -122,7 +122,7 @@ function formatMessageTime(timestamp: string): string {
 .bubble-wrapper {
   display: flex;
   flex-direction: column;
-  max-width: 500rpx;
+  max-width: 70%; // 使用相对宽度，更好适配不同屏幕尺寸
   gap: $spacing-xs;
 }
 

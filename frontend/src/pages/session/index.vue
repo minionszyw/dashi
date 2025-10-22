@@ -1,14 +1,14 @@
 <template>
   <view class="session-page">
-    <!-- 顶部导航（对齐胶囊按钮） -->
+    <!-- 自定义导航栏 -->
     <view class="navbar" :style="{ paddingTop: statusBarHeight + 'px' }">
       <view class="navbar-content" :style="{ height: navBarHeight + 'px' }">
-        <!-- 左侧创建按钮 -->
+        <!-- 左侧新建按钮 -->
         <view class="navbar-left" @click="handleCreate">
-          <text class="plus-icon">+</text>
+          <text class="create-icon">+</text>
         </view>
-        <!-- 中间标题 -->
-        <text class="page-title">会话</text>
+        <!-- 标题 -->
+        <text class="navbar-title">会话</text>
         <!-- 右侧预留胶囊空间 -->
         <view class="navbar-right" :style="{ width: menuButtonWidth + 'px' }"></view>
       </view>
@@ -66,11 +66,11 @@
           <view class="swipe-actions">
             <view 
               class="action-btn action-pin" 
-              @click.stop="handlePin(conversation.id)"
+              @tap.stop="handlePin(conversation.id)"
             >
               <text class="action-text">{{ isPinned(conversation.id) ? '取消' : '置顶' }}</text>
             </view>
-            <view class="action-btn action-delete" @click.stop="handleDelete(conversation.id)">
+            <view class="action-btn action-delete" @tap.stop="handleDelete(conversation.id)">
               <text class="action-text">删除</text>
             </view>
           </view>
@@ -81,18 +81,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
 import { useChatStore } from '@/stores'
 import { storage } from '@/utils/storage'
+import { getChatHistory } from '@/api'
 import type { Conversation } from '@/types'
 
 const chatStore = useChatStore()
 
 // 导航栏相关
-const statusBarHeight = ref(0) // 状态栏高度
-const navBarHeight = ref(44) // 导航栏内容高度
-const menuButtonWidth = ref(87) // 胶囊按钮区域宽度
+const statusBarHeight = ref(0)
+const navBarHeight = ref(44)
+const menuButtonWidth = ref(87)
 
 // 置顶相关
 const pinnedIds = ref<string[]>([])
@@ -108,39 +109,46 @@ const activeId = ref<string>('')
 // 会话消息缓存（用于显示预览）
 const conversationPreviews = ref<Record<string, { preview: string, firstQuestion: string }>>({})
 
-// 排序后的会话列表（置顶优先）
+// 排序后的会话列表（置顶优先，然后按时间倒序）
 const sortedConversations = computed(() => {
+  // 分离置顶和未置顶的会话
   const pinned = chatStore.conversations.filter(c => pinnedIds.value.includes(c.id))
   const unpinned = chatStore.conversations.filter(c => !pinnedIds.value.includes(c.id))
+  
+  // 按时间倒序排序（最新的在前）
+  const sortByTime = (a: Conversation, b: Conversation) => {
+    const timeA = new Date(a.updated_at || a.created_at).getTime()
+    const timeB = new Date(b.updated_at || b.created_at).getTime()
+    return timeB - timeA
+  }
+  
+  // 分别对置顶和未置顶的会话排序
+  pinned.sort(sortByTime)
+  unpinned.sort(sortByTime)
+  
   return [...pinned, ...unpinned]
 })
 
 onMounted(async () => {
-  // 获取系统信息和胶囊按钮位置（微信小程序）
+  // 获取系统信息和胶囊按钮位置
   // #ifdef MP-WEIXIN
   try {
     const systemInfo = uni.getSystemInfoSync()
     const menuButtonInfo = uni.getMenuButtonBoundingClientRect()
     
-    // 状态栏高度
     statusBarHeight.value = systemInfo.statusBarHeight || 0
-    
-    // 导航栏内容高度（胶囊按钮高度 + 上下间距）
     navBarHeight.value = menuButtonInfo.height + (menuButtonInfo.top - statusBarHeight.value) * 2
-    
-    // 胶囊按钮区域宽度（屏幕宽度 - 胶囊左边距）
     menuButtonWidth.value = systemInfo.windowWidth - menuButtonInfo.left
   } catch (e) {
-    console.error('获取胶囊位置失败:', e)
+    // 静默失败
   }
   // #endif
   
   // #ifndef MP-WEIXIN
-  // 非微信小程序环境使用默认值
   const systemInfo = uni.getSystemInfoSync()
   statusBarHeight.value = systemInfo.statusBarHeight || 20
   // #endif
-
+  
   // 加载置顶列表
   const savedPinnedIds = storage.get<string[]>('pinned_conversations')
   if (savedPinnedIds) {
@@ -236,10 +244,6 @@ function handleTouchMove(e: any, id: string) {
 
 // 触摸结束
 function handleTouchEnd(e: any, id: string) {
-  // 如果不是滑动操作，且没有打开的左滑项，则允许点击
-  if (!isSwiping.value && !swipingId.value) {
-    // 正常点击，不做处理
-  }
   activeId.value = ''
   isSwiping.value = false
 }
@@ -297,8 +301,12 @@ function isPinned(conversationId: string): boolean {
 }
 
 // 置顶/取消置顶
-function handlePin(id: string) {
+async function handlePin(id: string) {
   const wasPinned = isPinned(id)
+  
+  // 立即关闭左滑状态
+  swipingId.value = null
+  await nextTick()
   
   if (wasPinned) {
     // 取消置顶
@@ -307,9 +315,9 @@ function handlePin(id: string) {
     // 置顶
     pinnedIds.value.unshift(id)
   }
+  
   // 保存到本地存储
   storage.set('pinned_conversations', pinnedIds.value)
-  swipingId.value = null
   
   uni.showToast({
     title: wasPinned ? '已取消置顶' : '已置顶',
@@ -319,7 +327,11 @@ function handlePin(id: string) {
 }
 
 // 删除会话
-function handleDelete(id: string) {
+async function handleDelete(id: string) {
+  // 立即关闭左滑状态
+  swipingId.value = null
+  await nextTick()
+  
   uni.showModal({
     title: '确认删除',
     content: '确定要删除这个会话吗？',
@@ -329,7 +341,6 @@ function handleDelete(id: string) {
         // 同时从置顶列表中移除
         pinnedIds.value = pinnedIds.value.filter(pid => pid !== id)
         storage.set('pinned_conversations', pinnedIds.value)
-        swipingId.value = null
         uni.showToast({
           title: '删除成功',
           icon: 'success'
@@ -341,18 +352,34 @@ function handleDelete(id: string) {
 
 // 获取会话标题（智能显示）
 function getConversationTitle(conversation: Conversation): string {
-  // 如果有自定义标题且不是"新会话"，使用自定义标题
+  // 1. 如果有自定义标题且不是"新会话"，使用自定义标题
   if (conversation.title && conversation.title !== '新会话') {
     return conversation.title
   }
   
-  // 否则显示第一个用户问题（如果有缓存）
+  // 2. 尝试从缓存中获取第一个用户问题
   const cached = conversationPreviews.value[conversation.id]
-  if (cached && cached.firstQuestion) {
+  if (cached?.firstQuestion) {
     return cached.firstQuestion
   }
   
-  // 最后才显示"新会话"
+  // 3. 显示创建时间作为标题（更友好）
+  const createDate = new Date(conversation.created_at)
+  if (!isNaN(createDate.getTime())) {
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const msgDay = new Date(createDate.getFullYear(), createDate.getMonth(), createDate.getDate())
+    
+    if (msgDay.getTime() === today.getTime()) {
+      return '今天的对话'
+    } else if (msgDay.getTime() === today.getTime() - 24 * 60 * 60 * 1000) {
+      return '昨天的对话'
+    } else {
+      return `${createDate.getMonth() + 1}月${createDate.getDate()}日的对话`
+    }
+  }
+  
+  // 4. 最后才显示"新会话"
   return '新会话'
 }
 
@@ -382,8 +409,8 @@ function getConversationPreview(conversationId: string): string {
     }
   }
   
-  // 3. 默认显示提示文本
-  return '点击开始对话'
+  // 3. 默认显示更友好的提示文本
+  return '开始你的AI命理咨询'
 }
 
 // 加载会话预览信息
@@ -394,7 +421,61 @@ async function loadConversationPreviews() {
     conversationPreviews.value = cached
   }
   
-  // TODO: 可以后续从后端API批量获取最新消息
+  // 异步加载缺少预览的会话（后台加载，不阻塞UI）
+  loadMissingPreviews()
+}
+
+// 异步加载缺少预览的会话
+async function loadMissingPreviews() {
+  // 找出所有缺少预览的会话
+  const conversationsNeedingPreview = chatStore.conversations.filter(conv => {
+    const cached = conversationPreviews.value[conv.id]
+    return !cached || (!cached.preview && !cached.firstQuestion)
+  })
+  
+  // 如果没有需要加载的，直接返回
+  if (conversationsNeedingPreview.length === 0) {
+    return
+  }
+  
+  // 逐个加载（限制并发数为3）
+  const limit = 3
+  for (let i = 0; i < conversationsNeedingPreview.length; i += limit) {
+    const batch = conversationsNeedingPreview.slice(i, i + limit)
+    await Promise.all(batch.map(async (conv) => {
+      try {
+        // 获取会话历史（只获取最后2条消息）
+        const result = await getChatHistory(conv.id, { skip: 0, limit: 2 })
+        
+        if (result.messages && result.messages.length > 0) {
+          // 找到第一条用户消息和最后一条消息
+          const firstUserMsg = result.messages.find(m => m.role === 'user')
+          const lastMsg = result.messages[result.messages.length - 1]
+          
+          if (!conversationPreviews.value[conv.id]) {
+            conversationPreviews.value[conv.id] = { preview: '', firstQuestion: '' }
+          }
+          
+          // 更新标题（第一条用户消息）
+          if (firstUserMsg) {
+            conversationPreviews.value[conv.id].firstQuestion = firstUserMsg.content.length > 20
+              ? firstUserMsg.content.substring(0, 20) + '...'
+              : firstUserMsg.content
+          }
+          
+          // 更新预览（最后一条消息）
+          conversationPreviews.value[conv.id].preview = lastMsg.content.length > 30
+            ? lastMsg.content.substring(0, 30) + '...'
+            : lastMsg.content
+          
+          // 保存到缓存
+          storage.set('conversation_previews', conversationPreviews.value)
+        }
+      } catch (error: any) {
+        // 静默失败，不影响用户体验
+      }
+    }))
+  }
 }
 
 // 格式化时间
@@ -462,11 +543,11 @@ function formatTime(dateStr: string): string {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #ededed;
+  background: #f7f8fa;
 }
 
 // ============================================
-// 顶部导航（微信风格，对齐胶囊按钮）
+// 自定义导航栏
 // ============================================
 
 .navbar {
@@ -474,8 +555,9 @@ function formatTime(dateStr: string): string {
   top: 0;
   left: 0;
   right: 0;
-  background: #ededed;
-  z-index: 100;
+  background: #ffffff;
+  border-bottom: 1rpx solid $border-color;
+  z-index: 999;
 }
 
 .navbar-content {
@@ -489,9 +571,8 @@ function formatTime(dateStr: string): string {
 .navbar-left {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  width: 80rpx;
-  flex-shrink: 0;
+  justify-content: center;
+  min-width: 80rpx;
   transition: all $duration-fast $ease-apple;
   
   &:active {
@@ -499,7 +580,15 @@ function formatTime(dateStr: string): string {
   }
 }
 
-.page-title {
+.create-icon {
+  font-size: 56rpx;
+  font-weight: 300;
+  color: $primary;
+  line-height: 1;
+  margin-top: -6rpx;
+}
+
+.navbar-title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
@@ -510,18 +599,7 @@ function formatTime(dateStr: string): string {
 }
 
 .navbar-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
   flex-shrink: 0;
-}
-
-.plus-icon {
-  font-size: 56rpx;
-  font-weight: 300;
-  color: $text-primary;
-  line-height: 1;
-  margin-top: -8rpx;
 }
 
 // ============================================

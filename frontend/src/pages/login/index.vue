@@ -249,7 +249,7 @@ function handleTerms() {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 100rpx;
   padding: $spacing-xl $spacing-xl $spacing-base;
   background: linear-gradient(to top, $bg-page 80%, transparent);
   z-index: 10;

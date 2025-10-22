@@ -115,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore, useBaziStore } from '@/stores'
 
 const userStore = useUserStore()

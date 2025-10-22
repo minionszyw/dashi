@@ -92,11 +92,28 @@ export async function request<T = any>(options: RequestOptions): Promise<T> {
 }
 
 /**
+ * 将对象转换为查询字符串（兼容微信小程序）
+ */
+function objectToQueryString(obj: any): string {
+  if (!obj || Object.keys(obj).length === 0) {
+    return ''
+  }
+  
+  return Object.keys(obj)
+    .filter(key => obj[key] !== undefined && obj[key] !== null)
+    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`)
+    .join('&')
+}
+
+/**
  * GET请求
  */
 export function get<T = any>(url: string, data?: any): Promise<T> {
+  const queryString = data ? objectToQueryString(data) : ''
+  const finalUrl = queryString ? `${url}?${queryString}` : url
+  
   return request<T>({
-    url: data ? `${url}?${new URLSearchParams(data).toString()}` : url,
+    url: finalUrl,
     method: 'GET'
   })
 }
