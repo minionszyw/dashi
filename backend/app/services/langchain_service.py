@@ -30,7 +30,7 @@ class LangChainChatService:
     
     def _build_system_prompt(
         self,
-        ai_style: str = "professional",
+        ai_style: str = "balanced",
         bazi_info: Optional[Dict] = None
     ) -> str:
         """
@@ -102,7 +102,7 @@ class LangChainChatService:
         logger.info(f"🔗 关联八字档案ID: {conversation.bazi_profile_id}")
         
         # 获取AI对话风格
-        ai_style = conversation.ai_style or "professional"
+        ai_style = conversation.ai_style or "balanced"
         
         # 获取八字信息（如果有）
         bazi_info = None

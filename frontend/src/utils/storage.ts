@@ -77,10 +77,19 @@ export const storage = {
   },
 
   /**
-   * 清空所有存储
+   * 清空用户数据（保留用户设置）
    */
   clear() {
+    // 保存需要保留的用户偏好设置（不依赖于特定账号）
+    const aiSettings = this.get('ai_settings')
+    
+    // 清空所有存储
     uni.clearStorageSync()
+    
+    // 恢复设置
+    if (aiSettings) {
+      this.set('ai_settings', aiSettings)
+    }
   }
 }
 

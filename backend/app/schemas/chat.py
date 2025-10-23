@@ -12,7 +12,7 @@ class ConversationCreate(BaseModel):
     title: Optional[str] = Field(default="新会话", max_length=100)
     bazi_profile_id: Optional[UUID] = None
     context_size: int = Field(default=10, ge=5, le=50)
-    ai_style: str = Field(default="professional")
+    ai_style: str = Field(default="balanced")
 
 
 class ConversationUpdate(BaseModel):

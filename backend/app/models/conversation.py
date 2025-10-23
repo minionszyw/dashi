@@ -19,7 +19,7 @@ class Conversation(Base):
     title = Column(String(100), default="新会话")
     bazi_profile_id = Column(UUID(as_uuid=True), ForeignKey("bazi_profiles.id"), nullable=True)
     context_size = Column(Integer, default=10, comment="上下文消息数")
-    ai_style = Column(String(50), default="professional", comment="AI风格")
+    ai_style = Column(String(50), default="balanced", comment="AI风格")
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True, index=True, comment="软删除时间")

@@ -111,12 +111,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue'
-import { useChatStore, useUserStore } from '@/stores'
+import { useChatStore, useUserStore, useBaziStore } from '@/stores'
 import MessageBubble from '@/components/MessageBubble.vue'
 import { storage } from '@/utils/storage'
 
 const chatStore = useChatStore()
 const userStore = useUserStore()
+const baziStore = useBaziStore()
 
 const inputText = ref('')
 const scrollToView = ref('')
@@ -137,7 +138,7 @@ const canSend = computed(() => {
   return inputText.value.trim().length > 0 && !isAITyping.value
 })
 
-onMounted(async () => {
+onMounted(() => {
   // 检查登录状态
   if (!userStore.isLogin) {
     uni.reLaunch({
@@ -145,6 +146,11 @@ onMounted(async () => {
     })
     return
   }
+
+  // 异步加载八字档案列表（不阻塞页面加载）
+  baziStore.loadProfiles().catch(error => {
+    console.error('加载八字档案失败:', error)
+  })
 
   // 加载会话（如果有当前会话）
   if (chatStore.currentConversation) {
@@ -156,6 +162,24 @@ onMounted(async () => {
 async function handleSend() {
   const text = inputText.value.trim()
   if (!canSend.value || !text) return
+
+  // 检查是否有八字档案
+  if (!baziStore.profiles || baziStore.profiles.length === 0) {
+    uni.showModal({
+      title: '提示',
+      content: '请先设置出生信息才能使用AI对话功能',
+      confirmText: '去设置',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          uni.navigateTo({
+            url: '/pages/profile/bazi'
+          })
+        }
+      }
+    })
+    return
+  }
 
   if (!chatStore.currentConversation) {
     uni.showToast({
@@ -228,9 +252,9 @@ function updateConversationPreview(conversationId: string, userMessage: string, 
 }
 
 // 快速问题
-function handleQuickQuestion(question: string) {
+async function handleQuickQuestion(question: string) {
   inputText.value = question
-  handleSend()
+  await handleSend()
 }
 
 // 流式对话

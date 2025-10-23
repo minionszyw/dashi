@@ -19,6 +19,7 @@
           activeColor="#c9a87c"
           backgroundColor="#e8e6df"
           block-size="24"
+          @changing="handleContextChanging"
           @change="handleContextChange"
         />
         <view class="slider-labels">
@@ -93,7 +94,13 @@ onMounted(() => {
   }
 })
 
+function handleContextChanging(e: any) {
+  // 拖动过程中实时更新显示
+  contextSize.value = e.detail.value
+}
+
 function handleContextChange(e: any) {
+  // 拖动结束后更新值
   contextSize.value = e.detail.value
 }
 

@@ -148,6 +148,18 @@ async def send_message(
     """
     发送消息（流式响应）
     """
+    # 检查用户是否有八字档案
+    from app.models.bazi_profile import BaziProfile
+    bazi_count = db.query(BaziProfile).filter(
+        BaziProfile.user_id == current_user.id
+    ).count()
+    
+    if bazi_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="请先设置出生信息才能使用AI对话功能"
+        )
+    
     # 验证会话
     conversation = db.query(Conversation).filter(
         Conversation.id == message_data.conversation_id,
