@@ -88,18 +88,16 @@
       <view class="menu-popup">
         <view class="menu-content">
           <view class="menu-title">更多功能</view>
-          <view class="menu-grid">
+          <view class="menu-list">
             <view class="menu-item" @click="handleNewConversation">
-              <view class="menu-icon-wrapper">
-                <text class="menu-icon">💬</text>
-              </view>
-              <text class="menu-label">新建会话</text>
+              <view class="menu-item-icon">✦</view>
+              <text class="menu-item-text">新建会话</text>
+              <text class="menu-item-arrow">›</text>
             </view>
             <view class="menu-item" @click="handleClearChat">
-              <view class="menu-icon-wrapper">
-                <text class="menu-icon">🗑️</text>
-              </view>
-              <text class="menu-label">清空对话</text>
+              <view class="menu-item-icon">✕</view>
+              <text class="menu-item-text">清空对话</text>
+              <text class="menu-item-arrow">›</text>
             </view>
           </view>
           <view class="menu-cancel" @click="handleCloseMenu">
@@ -611,46 +609,56 @@ function scrollToBottom() {
 }
 
 .menu-title {
-  padding: $space-lg;
+  padding: $space-lg $space-xl;
   text-align: center;
-  font-size: $font-sm;
-  color: $text-tertiary;
+  font-size: $font-base;
+  font-weight: $weight-medium;
+  color: $text-primary;
   border-bottom: 1rpx solid $border-color;
 }
 
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: $space-xl $space-base;
-  gap: $space-lg;
+.menu-list {
+  padding: $space-sm 0;
 }
 
 .menu-item {
-  @include flex-center;
-  flex-direction: column;
-  gap: $space-sm;
+  @include flex-center-y;
+  padding: $space-lg $space-xl;
+  gap: $space-md;
+  transition: background $duration-fast;
   
   &:active {
-    opacity: 0.7;
+    background: $bg-hover;
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1rpx solid $border-light;
   }
 }
 
-.menu-icon-wrapper {
-  width: 96rpx;
-  height: 96rpx;
+.menu-item-icon {
+  width: 64rpx;
+  height: 64rpx;
   @include flex-center;
-  background: $bg-page;
-  border-radius: $radius-lg;
-  border: 1rpx solid $border-light;
+  background: linear-gradient(135deg, $accent 0%, rgba($accent, 0.8) 100%);
+  border-radius: $radius-base;
+  font-size: 32rpx;
+  color: $text-primary;
+  flex-shrink: 0;
+  font-weight: $weight-bold;
 }
 
-.menu-icon {
-  font-size: 48rpx;
+.menu-item-text {
+  flex: 1;
+  font-size: $font-md;
+  color: $text-primary;
+  font-weight: $weight-medium;
 }
 
-.menu-label {
-  font-size: $font-xs;
-  color: $text-secondary;
+.menu-item-arrow {
+  font-size: 40rpx;
+  color: $text-disabled;
+  font-weight: 300;
 }
 
 .menu-cancel {

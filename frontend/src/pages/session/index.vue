@@ -46,11 +46,14 @@
             @touchend="handleTouchEnd($event, conversation.id)"
             @click="handleSelect(conversation.id)"
           >
-            <!-- 置顶标识 -->
-            <view v-if="isPinned(conversation.id)" class="pin-badge">📌</view>
-            
             <!-- 头像 -->
-            <image class="session-avatar" src="/static/ai-avatar.svg" mode="aspectFill" />
+            <view class="avatar-wrapper">
+              <image class="session-avatar" src="/static/ai-avatar.svg" mode="aspectFill" />
+              <!-- 置顶标识 -->
+              <view v-if="isPinned(conversation.id)" class="pin-badge">
+                <text class="pin-icon">★</text>
+              </view>
+            </view>
             
             <!-- 会话内容 -->
             <view class="session-content">
@@ -581,9 +584,9 @@ function formatTime(dateStr: string): string {
   }
 }
 
-.pin-badge {
-  font-size: 24rpx;
-  margin-right: $space-sm;
+.avatar-wrapper {
+  position: relative;
+  margin-right: $space-md;
   flex-shrink: 0;
 }
 
@@ -592,9 +595,28 @@ function formatTime(dateStr: string): string {
   height: 88rpx;
   border-radius: $radius-lg;
   background: $bg-page;
-  margin-right: $space-md;
-  flex-shrink: 0;
   border: 1rpx solid $border-color;
+  display: block;
+}
+
+.pin-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  width: 36rpx;
+  height: 36rpx;
+  @include flex-center;
+  background: linear-gradient(135deg, $accent 0%, rgba($accent, 0.9) 100%);
+  border-radius: 50%;
+  border: 2rpx solid $bg-card;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+.pin-icon {
+  font-size: 18rpx;
+  color: $text-primary;
+  font-weight: $weight-bold;
+  line-height: 1;
 }
 
 .session-content {
