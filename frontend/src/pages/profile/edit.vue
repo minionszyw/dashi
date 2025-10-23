@@ -6,7 +6,7 @@
       <view class="edit-item" @click="handleChooseAvatar">
         <text class="item-label">头像</text>
         <view class="item-value">
-          <image :src="form.avatar_url || '/static/default-avatar.svg'" class="avatar-preview" mode="aspectFill" />
+          <image :src="form.avatar_url || '/static/user-avatar.svg'" class="avatar-preview" mode="aspectFill" />
           <text class="arrow">›</text>
         </view>
       </view>
@@ -357,24 +357,24 @@ async function handleSave() {
 .edit-page {
   min-height: 100vh;
   background: $bg-page;
-  padding-bottom: $spacing-xxxl;
+  padding-bottom: $space-xxxl;
 }
 
 .edit-section {
-  margin-top: $spacing-base;
+  margin-top: $space-base;
   background: $bg-card;
 }
 
 .section-title {
-  padding: $spacing-lg $spacing-base $spacing-sm;
-  font-size: $font-size-sm;
+  padding: $space-lg $space-base $space-sm;
+  font-size: $font-sm;
   color: $text-tertiary;
-  font-weight: $font-weight-medium;
+  font-weight: $weight-medium;
 }
 
 .edit-item {
   @include flex-between;
-  padding: $spacing-lg $spacing-base;
+  padding: $space-lg $space-base;
   border-bottom: 1rpx solid $border-color;
   
   &:last-child {
@@ -391,18 +391,18 @@ async function handleSave() {
 }
 
 .item-label {
-  font-size: $font-size-md;
+  font-size: $font-md;
   color: $text-primary;
-  font-weight: $font-weight-medium;
+  font-weight: $weight-medium;
   min-width: 140rpx;
 }
 
 .item-input {
   flex: 1;
   text-align: right;
-  font-size: $font-size-md;
+  font-size: $font-md;
   color: $text-primary;
-  margin-left: $spacing-base;
+  margin-left: $space-base;
   
   &::placeholder {
     color: $text-tertiary;
@@ -411,11 +411,11 @@ async function handleSave() {
 
 .item-value {
   @include flex-center-y;
-  gap: $spacing-md;
+  gap: $space-md;
 }
 
 .item-value-text {
-  font-size: $font-size-md;
+  font-size: $font-md;
   color: $text-secondary;
   
   &.disabled {
@@ -433,25 +433,25 @@ async function handleSave() {
 .arrow {
   font-size: 48rpx;
   color: $text-disabled;
-  font-weight: $font-weight-light;
+  font-weight: $weight-light;
 }
 
 .radio-group {
   @include flex-center-y;
-  gap: $spacing-xl;
+  gap: $space-xl;
 }
 
 .radio-item {
   @include flex-center-y;
-  gap: $spacing-sm;
-  font-size: $font-size-md;
+  gap: $space-sm;
+  font-size: $font-md;
   color: $text-primary;
 }
 
 .picker-value {
   flex: 1;
   text-align: right;
-  font-size: $font-size-md;
+  font-size: $font-md;
   color: $text-primary;
   
   &.placeholder {
@@ -460,13 +460,13 @@ async function handleSave() {
 }
 
 .save-section {
-  padding: $spacing-xxl $spacing-base;
+  padding: $space-xxl $space-base;
 }
 
 .save-button {
   @include btn-primary;
   height: 88rpx;
-  font-size: $font-size-lg;
+  font-size: $font-lg;
 }
 </style>
 

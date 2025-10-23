@@ -29,7 +29,7 @@ onHide(() => {
 
 page {
   font-family: $font-family;
-  font-size: $font-size-base;
+  font-size: $font-base;
   color: $text-primary;
   background: $bg-page;
   line-height: 1.6;
@@ -87,7 +87,7 @@ scroll-view {
 // Modal样式
 .uni-modal {
   .uni-modal__bd {
-    padding: $spacing-xl $spacing-lg !important;
+    padding: $space-xl $space-lg !important;
     line-height: 1.6 !important;
   }
   
@@ -97,7 +97,7 @@ scroll-view {
       
       &.uni-modal__btn_primary {
         color: $primary !important;
-        font-weight: $font-weight-semibold !important;
+        font-weight: $weight-semibold !important;
       }
     }
   }

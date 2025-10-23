@@ -11,7 +11,7 @@
 
 page {
   font-family: $font-family;
-  font-size: $font-size-base;
+  font-size: $font-base;
   color: $text-primary;
   background: $bg-page;
   line-height: 1.6;
@@ -19,192 +19,194 @@ page {
   -moz-osx-font-smoothing: grayscale;
 }
 
-view, text, image, button {
+view, text, image, button, input {
   box-sizing: border-box;
 }
 
 button {
-  padding: 0;
-  margin: 0;
-  background: none;
-  border: none;
-  
-  &::after {
-    border: none;
-  }
+  @include button-reset;
 }
 
 // ============================================
-// 通用容器
+// 容器
 // ============================================
 
 .container {
   padding: $page-padding;
 }
 
-.safe-area-bottom {
-  @include safe-area-bottom($spacing-base);
+.container-full {
+  width: 100%;
+  height: 100%;
 }
 
 // ============================================
-// 通用卡片
+// 卡片
 // ============================================
 
 .card {
   @include card;
-  padding: $spacing-base;
-  margin-bottom: $spacing-base;
+  padding: $space-base;
 }
 
-.card-hover {
-  @include card-hover;
-  padding: $spacing-base;
-  margin-bottom: $spacing-base;
+.card-bordered {
+  @include card-bordered;
+  padding: $space-base;
 }
 
 // ============================================
-// 通用按钮
+// 按钮
 // ============================================
+
+.btn {
+  @include btn-base;
+  height: 80rpx;
+  font-size: $font-base;
+}
 
 .btn-primary {
   @include btn-primary;
-  width: 100%;
-  height: 88rpx;
-  font-size: $font-size-md;
 }
 
-.btn-secondary {
-  @include btn-secondary;
+.btn-accent {
+  @include btn-accent;
+}
+
+.btn-ghost {
+  @include btn-ghost;
+}
+
+.btn-block {
   width: 100%;
-  height: 88rpx;
-  font-size: $font-size-md;
+}
+
+.btn-large {
+  height: 96rpx;
+  font-size: $font-md;
+}
+
+.btn-small {
+  height: 64rpx;
+  font-size: $font-sm;
+  padding: 0 $space-base;
 }
 
 // ============================================
 // 文本工具类
 // ============================================
 
-.text-primary {
-  color: $text-primary;
-}
+.text-primary { color: $text-primary; }
+.text-secondary { color: $text-secondary; }
+.text-tertiary { color: $text-tertiary; }
+.text-disabled { color: $text-disabled; }
+.text-inverse { color: $text-inverse; }
+.text-accent { color: $accent; }
+.text-error { color: $error; }
+.text-success { color: $success; }
 
-.text-secondary {
-  color: $text-secondary;
-}
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
 
-.text-tertiary {
-  color: $text-tertiary;
-}
+.text-ellipsis { @include text-ellipsis; }
+.text-ellipsis-2 { @include text-multi-ellipsis(2); }
+.text-ellipsis-3 { @include text-multi-ellipsis(3); }
 
-.text-disabled {
-  color: $text-disabled;
-}
+.text-xs { font-size: $font-xs; }
+.text-sm { font-size: $font-sm; }
+.text-base { font-size: $font-base; }
+.text-md { font-size: $font-md; }
+.text-lg { font-size: $font-lg; }
+.text-xl { font-size: $font-xl; }
 
-.text-center {
-  text-align: center;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.ellipsis {
-  @include ellipsis;
-}
-
-.ellipsis-2 {
-  @include ellipsis-multi(2);
-}
-
-.ellipsis-3 {
-  @include ellipsis-multi(3);
-}
+.text-light { font-weight: $weight-light; }
+.text-normal { font-weight: $weight-normal; }
+.text-medium { font-weight: $weight-medium; }
+.text-semibold { font-weight: $weight-semibold; }
+.text-bold { font-weight: $weight-bold; }
 
 // ============================================
 // 布局工具类
 // ============================================
 
-.flex-center {
-  @include flex-center;
-}
-
-.flex-center-y {
-  @include flex-center-y;
-}
-
-.flex-center-x {
-  @include flex-center-x;
-}
-
-.flex-between {
-  @include flex-between;
-}
+.flex { display: flex; }
+.flex-center { @include flex-center; }
+.flex-center-y { @include flex-center-y; }
+.flex-center-x { @include flex-center-x; }
+.flex-between { @include flex-between; }
+.flex-column { @include flex-column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-1 { flex: 1; }
 
 // ============================================
 // 间距工具类
 // ============================================
 
-.mt-xs { margin-top: $spacing-xs; }
-.mt-sm { margin-top: $spacing-sm; }
-.mt-md { margin-top: $spacing-md; }
-.mt-base { margin-top: $spacing-base; }
-.mt-lg { margin-top: $spacing-lg; }
-.mt-xl { margin-top: $spacing-xl; }
+.m-0 { margin: 0; }
+.mt-xs { margin-top: $space-xs; }
+.mt-sm { margin-top: $space-sm; }
+.mt-md { margin-top: $space-md; }
+.mt-base { margin-top: $space-base; }
+.mt-lg { margin-top: $space-lg; }
+.mt-xl { margin-top: $space-xl; }
 
-.mb-xs { margin-bottom: $spacing-xs; }
-.mb-sm { margin-bottom: $spacing-sm; }
-.mb-md { margin-bottom: $spacing-md; }
-.mb-base { margin-bottom: $spacing-base; }
-.mb-lg { margin-bottom: $spacing-lg; }
-.mb-xl { margin-bottom: $spacing-xl; }
+.mb-xs { margin-bottom: $space-xs; }
+.mb-sm { margin-bottom: $space-sm; }
+.mb-md { margin-bottom: $space-md; }
+.mb-base { margin-bottom: $space-base; }
+.mb-lg { margin-bottom: $space-lg; }
+.mb-xl { margin-bottom: $space-xl; }
 
-.pt-xs { padding-top: $spacing-xs; }
-.pt-sm { padding-top: $spacing-sm; }
-.pt-md { padding-top: $spacing-md; }
-.pt-base { padding-top: $spacing-base; }
-.pt-lg { padding-top: $spacing-lg; }
-.pt-xl { padding-top: $spacing-xl; }
+.ml-xs { margin-left: $space-xs; }
+.ml-sm { margin-left: $space-sm; }
+.ml-base { margin-left: $space-base; }
+.ml-lg { margin-left: $space-lg; }
 
-.pb-xs { padding-bottom: $spacing-xs; }
-.pb-sm { padding-bottom: $spacing-sm; }
-.pb-md { padding-bottom: $spacing-md; }
-.pb-base { padding-bottom: $spacing-base; }
-.pb-lg { padding-bottom: $spacing-lg; }
-.pb-xl { padding-bottom: $spacing-xl; }
+.mr-xs { margin-right: $space-xs; }
+.mr-sm { margin-right: $space-sm; }
+.mr-base { margin-right: $space-base; }
+.mr-lg { margin-right: $space-lg; }
+
+.p-0 { padding: 0; }
+.pt-xs { padding-top: $space-xs; }
+.pt-sm { padding-top: $space-sm; }
+.pt-base { padding-top: $space-base; }
+.pt-lg { padding-top: $space-lg; }
+.pt-xl { padding-top: $space-xl; }
+
+.pb-xs { padding-bottom: $space-xs; }
+.pb-sm { padding-bottom: $space-sm; }
+.pb-base { padding-bottom: $space-base; }
+.pb-lg { padding-bottom: $space-lg; }
+.pb-xl { padding-bottom: $space-xl; }
+
+.pl-base { padding-left: $space-base; }
+.pr-base { padding-right: $space-base; }
 
 // ============================================
-// 导航栏
+// 分割线
 // ============================================
 
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border-bottom: 1px solid $border-color;
-  z-index: 999;
+.divider-h {
+  @include divider-h;
+  margin: $space-base 0;
 }
 
-.navbar-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 $spacing-base;
-  position: relative;
+.divider-v {
+  @include divider-v;
+  margin: 0 $space-base;
 }
 
-.navbar-left {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 80rpx;
+// ============================================
+// 安全区域
+// ============================================
+
+.safe-area-bottom {
+  @include safe-area-bottom($space-base);
 }
 
-.navbar-right {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+.safe-area-top {
+  @include safe-area-top($space-base);
 }
 
 // ============================================
@@ -212,12 +214,8 @@ button {
 // ============================================
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes fadeInUp {
@@ -253,19 +251,90 @@ button {
   }
 }
 
-.fade-in {
-  animation: fadeIn $duration-base $ease-apple;
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.fade-in-up {
-  animation: fadeInUp $duration-base $ease-apple;
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.fade-in-down {
-  animation: fadeInDown $duration-base $ease-apple;
+.fade-in { animation: fadeIn $duration-base $ease-in-out; }
+.fade-in-up { animation: fadeInUp $duration-base $ease-in-out; }
+.fade-in-down { animation: fadeInDown $duration-base $ease-in-out; }
+.scale-in { animation: scaleIn $duration-base $ease-in-out; }
+.slide-in-left { animation: slideInLeft $duration-base $ease-in-out; }
+.slide-in-right { animation: slideInRight $duration-base $ease-in-out; }
+
+// ============================================
+// 遮罩
+// ============================================
+
+.mask {
+  @include mask;
 }
 
-.scale-in {
-  animation: scaleIn $duration-base $ease-apple;
+// ============================================
+// 徽章
+// ============================================
+
+.badge {
+  @include badge;
 }
 
+// ============================================
+// 空状态
+// ============================================
+
+.empty-state {
+  @include flex-center;
+  flex-direction: column;
+  padding: $space-xxxl $space-xl;
+  min-height: 400rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: $space-lg;
+  opacity: 0.3;
+}
+
+.empty-title {
+  font-size: $font-lg;
+  font-weight: $weight-medium;
+  color: $text-primary;
+  margin-bottom: $space-sm;
+}
+
+.empty-desc {
+  font-size: $font-base;
+  color: $text-secondary;
+}
+
+// ============================================
+// 加载状态
+// ============================================
+
+.loading {
+  @include flex-center;
+  padding: $space-xl;
+}
+
+.loading-text {
+  font-size: $font-base;
+  color: $text-secondary;
+}

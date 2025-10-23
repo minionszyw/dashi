@@ -1,6 +1,5 @@
 /**
- * 全局混入（Mixins）
- * 常用的样式片段
+ * Mixins - 可复用样式片段
  */
 
 @import './variables.scss';
@@ -9,115 +8,109 @@
 // 布局
 // ============================================
 
-// Flex 居中
 @mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-// Flex 垂直居中
 @mixin flex-center-y {
   display: flex;
   align-items: center;
 }
 
-// Flex 水平居中
 @mixin flex-center-x {
   display: flex;
   justify-content: center;
 }
 
-// Flex 两端对齐
 @mixin flex-between {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
 // ============================================
 // 文本
 // ============================================
 
-// 单行文本省略
-@mixin ellipsis {
+@mixin text-ellipsis {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-// 多行文本省略
-@mixin ellipsis-multi($lines: 2) {
+@mixin text-multi-ellipsis($lines: 2) {
   display: -webkit-box;
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: $lines;
   -webkit-box-orient: vertical;
+  word-break: break-all;
 }
 
 // ============================================
-// 卡片样式
+// 卡片
 // ============================================
 
-// 基础卡片
 @mixin card {
   background: $bg-card;
   border-radius: $radius-lg;
-  box-shadow: $shadow-sm;
-  overflow: hidden;
+  box-shadow: $shadow-base;
 }
 
-// 悬浮卡片
-@mixin card-hover {
-  @include card;
-  transition: all $duration-base $ease-apple;
-  
-  &:active {
-    transform: scale(0.98);
-    box-shadow: $shadow-xs;
-  }
+@mixin card-bordered {
+  background: $bg-card;
+  border: 2rpx solid $border-color;
+  border-radius: $radius-lg;
 }
 
 // ============================================
-// 按钮样式
+// 按钮
 // ============================================
 
-// 主按钮
-@mixin btn-primary {
+@mixin btn-base {
   @include flex-center;
-  background: $primary-gradient;
-  color: #ffffff;
-  border-radius: $radius-round;
-  font-weight: $font-weight-medium;
-  box-shadow: $shadow-sm;
-  transition: all $duration-base $ease-apple;
-  
-  &:active {
-    transform: scale(0.96);
-    opacity: 0.9;
-  }
+  padding: 0 $space-lg;
+  border-radius: $radius-base;
+  font-weight: $weight-medium;
+  transition: all $duration-base $ease-in-out;
   
   &::after {
     border: none;
   }
+  
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
 }
 
-// 次要按钮
-@mixin btn-secondary {
-  @include flex-center;
-  background: $bg-card;
+@mixin btn-primary {
+  @include btn-base;
+  background: $primary;
+  color: $text-inverse;
+}
+
+@mixin btn-accent {
+  @include btn-base;
+  background: $accent;
   color: $text-primary;
+}
+
+@mixin btn-ghost {
+  @include btn-base;
+  background: transparent;
   border: 2rpx solid $border-color;
-  border-radius: $radius-round;
-  font-weight: $font-weight-medium;
-  transition: all $duration-base $ease-apple;
+  color: $text-primary;
   
   &:active {
     background: $bg-hover;
-  }
-  
-  &::after {
-    border: none;
   }
 }
 
@@ -128,15 +121,15 @@
 @mixin input {
   background: $bg-card;
   border: 2rpx solid $border-color;
-  border-radius: $radius-lg;
-  padding: $spacing-base;
-  font-size: $font-size-base;
+  border-radius: $radius-base;
+  padding: $space-base;
+  font-size: $font-base;
   color: $text-primary;
-  transition: all $duration-base $ease-apple;
+  transition: all $duration-base $ease-in-out;
   
   &:focus {
     border-color: $primary;
-    box-shadow: 0 0 0 6rpx rgba($primary, 0.1);
+    background: $bg-hover;
   }
 }
 
@@ -144,9 +137,14 @@
 // 分割线
 // ============================================
 
-@mixin divider {
+@mixin divider-h {
   height: 1rpx;
-  background: $divider;
+  background: $border-color;
+}
+
+@mixin divider-v {
+  width: 1rpx;
+  background: $border-color;
 }
 
 // ============================================
@@ -157,25 +155,22 @@
   padding-bottom: calc(#{$extra} + env(safe-area-inset-bottom));
 }
 
-// ============================================
-// 毛玻璃效果
-// ============================================
-
-@mixin frosted-glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(20rpx);
-  -webkit-backdrop-filter: blur(20rpx);
+@mixin safe-area-top($extra: 0rpx) {
+  padding-top: calc(#{$extra} + env(safe-area-inset-top));
 }
 
 // ============================================
-// 渐变文字
+// 遮罩层
 // ============================================
 
-@mixin gradient-text($gradient: $primary-gradient) {
-  background: $gradient;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+@mixin mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: $bg-mask;
+  z-index: $z-modal;
 }
 
 // ============================================
@@ -183,14 +178,80 @@
 // ============================================
 
 @mixin badge {
+  @include flex-center;
   min-width: 32rpx;
   height: 32rpx;
   padding: 0 8rpx;
   background: $error;
-  color: #ffffff;
+  color: $text-inverse;
   border-radius: $radius-round;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-medium;
-  @include flex-center;
+  font-size: $font-xs;
+  font-weight: $weight-medium;
 }
 
+// ============================================
+// 响应式
+// ============================================
+
+@mixin responsive-sm {
+  @media (max-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin responsive-md {
+  @media (max-width: $breakpoint-md) {
+    @content;
+  }
+}
+
+@mixin responsive-lg {
+  @media (max-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
+// ============================================
+// 清除按钮样式
+// ============================================
+
+@mixin button-reset {
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  
+  &::after {
+    border: none;
+  }
+}
+
+// ============================================
+// 毛玻璃效果
+// ============================================
+
+@mixin glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+}
+
+// ============================================
+// 滚动条样式（H5）
+// ============================================
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 8rpx;
+    height: 8rpx;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: $border-color;
+    border-radius: $radius-round;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}

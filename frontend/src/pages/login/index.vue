@@ -1,19 +1,22 @@
 <template>
   <view class="login-page">
-    <!-- 装饰性渐变背景 -->
-    <view class="bg-gradient"></view>
-    
     <!-- 主要内容区 -->
     <view class="content">
       <!-- Logo 和品牌区 -->
       <view class="brand-section fade-in">
         <view class="logo-wrapper">
-          <image src="/static/logo.png" mode="aspectFit" class="logo" />
+          <image src="/static/logo.svg" mode="aspectFit" class="logo" />
         </view>
-        <text class="app-name">国学大师</text>
-        <text class="app-slogan">专业命理分析 · 智能对话助手</text>
+        <text class="app-name">大师命理</text>
+        <text class="app-slogan">专业八字排盘 · AI智能解析</text>
       </view>
       
+      <!-- 装饰性元素 -->
+      <view class="decoration">
+        <view class="decoration-line"></view>
+        <text class="decoration-text">传承千年智慧</text>
+        <view class="decoration-line"></view>
+      </view>
     </view>
     
     <!-- 底部登录区 -->
@@ -23,12 +26,9 @@
         open-type="getUserInfo"
         @getuserinfo="handleGetUserInfo"
         :loading="loading"
-        hover-class="login-button-active"
+        hover-class="login-button-hover"
       >
-        <view class="button-content">
-          <image src="/static/wechat-icon.svg" class="wechat-icon" v-if="!loading" />
-          <text class="button-text">{{ loading ? '登录中...' : '微信一键登录' }}</text>
-        </view>
+        <text class="button-text">{{ loading ? '登录中...' : '微信登录' }}</text>
       </button>
       
       <!-- 协议提示 -->
@@ -132,7 +132,6 @@ function navigateToHome() {
 }
 
 function handlePrivacy() {
-  // TODO: 打开隐私政策页面
   uni.showToast({
     title: '隐私政策',
     icon: 'none'
@@ -140,7 +139,6 @@ function handlePrivacy() {
 }
 
 function handleTerms() {
-  // TODO: 打开用户协议页面
   uni.showToast({
     title: '用户协议',
     icon: 'none'
@@ -153,26 +151,10 @@ function handleTerms() {
 @import '@/styles/mixins.scss';
 
 .login-page {
-  position: relative;
   min-height: 100vh;
   background: $bg-page;
-  overflow: hidden;
-}
-
-// ============================================
-// 渐变背景
-// ============================================
-
-.bg-gradient {
-  position: fixed;
-  top: -50%;
-  left: -50%;
-  right: -50%;
-  bottom: -50%;
-  background: $primary-gradient;
-  opacity: 0.08;
-  transform: rotate(-12deg);
-  z-index: 0;
+  @include flex-column;
+  justify-content: space-between;
 }
 
 // ============================================
@@ -180,14 +162,10 @@ function handleTerms() {
 // ============================================
 
 .content {
-  position: relative;
-  z-index: 1;
-  min-height: 60vh;
-  padding: 120rpx $spacing-xl $spacing-xl;
-  display: flex;
+  flex: 1;
+  @include flex-center;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: $space-xxxl $space-xl;
 }
 
 // ============================================
@@ -196,49 +174,58 @@ function handleTerms() {
 
 .brand-section {
   text-align: center;
-  margin-bottom: $spacing-xxxl;
+  margin-bottom: $space-xxxl;
 }
 
 .logo-wrapper {
-  width: 160rpx;
-  height: 160rpx;
-  margin: 0 auto $spacing-xl;
-  background: $bg-card;
-  border-radius: $radius-xl;
+  width: 180rpx;
+  height: 180rpx;
+  margin: 0 auto $space-xl;
   @include flex-center;
-  box-shadow: $shadow-lg;
-  position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    inset: -4rpx;
-    background: $primary-gradient;
-    border-radius: $radius-xl;
-    opacity: 0.2;
-    z-index: -1;
-  }
 }
 
 .logo {
-  width: 120rpx;
-  height: 120rpx;
+  width: 100%;
+  height: 100%;
 }
 
 .app-name {
   display: block;
-  font-size: $font-size-xxxl;
-  font-weight: $font-weight-bold;
-  @include gradient-text;
-  margin-bottom: $spacing-sm;
-  letter-spacing: 2rpx;
+  font-size: $font-xxxl;
+  font-weight: $weight-bold;
+  color: $primary;
+  margin-bottom: $space-sm;
+  letter-spacing: 8rpx;
 }
 
 .app-slogan {
   display: block;
-  font-size: $font-size-base;
+  font-size: $font-base;
   color: $text-secondary;
-  font-weight: $font-weight-medium;
+  letter-spacing: 2rpx;
+}
+
+// ============================================
+// 装饰性元素
+// ============================================
+
+.decoration {
+  @include flex-center-y;
+  gap: $space-base;
+  margin-top: $space-xxl;
+  opacity: 0.6;
+}
+
+.decoration-line {
+  width: 60rpx;
+  height: 2rpx;
+  background: linear-gradient(to right, transparent, $accent, transparent);
+}
+
+.decoration-text {
+  font-size: $font-sm;
+  color: $text-tertiary;
+  letter-spacing: 2rpx;
 }
 
 // ============================================
@@ -246,53 +233,29 @@ function handleTerms() {
 // ============================================
 
 .footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 100rpx;
-  padding: $spacing-xl $spacing-xl $spacing-base;
-  background: linear-gradient(to top, $bg-page 80%, transparent);
-  z-index: 10;
+  padding: $space-xl;
 }
 
 .login-button {
+  @include btn-primary;
   width: 100%;
   height: 96rpx;
-  background: $wechat-green;
-  border-radius: $radius-round;
-  box-shadow: $shadow-md;
-  transition: all $duration-base $ease-apple;
-  
-  &::after {
-    border: none;
-  }
+  font-size: $font-md;
+  border-radius: $radius-base;
   
   &:active:not([loading]) {
     transform: scale(0.98);
-    box-shadow: $shadow-sm;
   }
 }
 
-.login-button-active {
+.login-button-hover {
   opacity: 0.9;
 }
 
-.button-content {
-  @include flex-center;
-  height: 100%;
-}
-
-.wechat-icon {
-  width: 48rpx;
-  height: 48rpx;
-  margin-right: $spacing-base;
-  flex-shrink: 0;
-}
-
 .button-text {
-  font-size: $font-size-md;
-  font-weight: $font-weight-semibold;
-  color: #ffffff;
+  font-weight: $weight-medium;
+  color: $text-inverse;
+  letter-spacing: 2rpx;
 }
 
 // ============================================
@@ -300,19 +263,19 @@ function handleTerms() {
 // ============================================
 
 .agreement {
-  margin-top: $spacing-lg;
+  margin-top: $space-lg;
   text-align: center;
   line-height: 1.8;
 }
 
 .agreement-text {
-  font-size: $font-size-xs;
+  font-size: $font-xs;
   color: $text-tertiary;
 }
 
 .agreement-link {
-  font-size: $font-size-xs;
-  color: $primary;
+  font-size: $font-xs;
+  color: $accent;
   margin: 0 4rpx;
   
   &:active {
@@ -325,26 +288,13 @@ function handleTerms() {
 // ============================================
 
 .fade-in {
-  animation: fadeIn $duration-slow $ease-apple;
-}
-
-.fade-in-up {
-  animation: fadeInUp $duration-slow $ease-apple;
+  animation: fadeIn 0.8s ease;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(60rpx);
+    transform: translateY(40rpx);
   }
   to {
     opacity: 1;

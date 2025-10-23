@@ -66,38 +66,38 @@ function handleRecharge() {
 .recharge-page {
   min-height: 100vh;
   background: $bg-page;
-  padding: $spacing-base;
+  padding: $space-base;
 }
 
 .package-section {
-  margin-bottom: $spacing-xl;
+  margin-bottom: $space-xl;
 }
 
 .section-title {
   display: block;
-  font-size: $font-size-lg;
-  font-weight: $font-weight-semibold;
+  font-size: $font-lg;
+  font-weight: $weight-semibold;
   color: $text-primary;
-  margin-bottom: $spacing-lg;
+  margin-bottom: $space-lg;
 }
 
 .packages {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: $spacing-base;
+  gap: $space-base;
 }
 
 .package-card {
-  @include card;
-  padding: $spacing-xl $spacing-base;
+  @include card-bordered;
+  padding: $space-xl $space-base;
   text-align: center;
   position: relative;
-  transition: all $duration-base $ease-apple;
-  border: 3rpx solid transparent;
+  transition: all $duration-base ease;
   
   &.active {
-    border-color: $primary;
-    box-shadow: $shadow-md;
+    border-color: $accent;
+    box-shadow: $shadow-lg;
+    background: rgba($accent, 0.02);
   }
   
   &:active {
@@ -109,39 +109,40 @@ function handleRecharge() {
   position: absolute;
   top: -4rpx;
   right: -4rpx;
-  background: $primary-gradient;
-  color: #ffffff;
-  font-size: $font-size-xs;
+  background: $accent;
+  color: $text-primary;
+  font-size: $font-xs;
   padding: 4rpx 16rpx;
   border-radius: 0 $radius-lg 0 $radius-lg;
+  font-weight: $weight-medium;
 }
 
 .package-amount {
   display: block;
   font-size: 56rpx;
-  font-weight: $font-weight-bold;
-  @include gradient-text;
+  font-weight: $weight-bold;
+  color: $accent;
   margin-bottom: 8rpx;
 }
 
 .package-unit {
   display: block;
-  font-size: $font-size-sm;
+  font-size: $font-sm;
   color: $text-tertiary;
-  margin-bottom: $spacing-base;
+  margin-bottom: $space-base;
 }
 
 .package-price {
   display: block;
-  font-size: $font-size-xl;
+  font-size: $font-xl;
   color: $error;
-  font-weight: $font-weight-semibold;
-  margin-bottom: $spacing-sm;
+  font-weight: $weight-semibold;
+  margin-bottom: $space-sm;
 }
 
 .package-desc {
   display: block;
-  font-size: $font-size-xs;
+  font-size: $font-xs;
   color: $text-secondary;
 }
 
@@ -150,7 +151,7 @@ function handleRecharge() {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: $spacing-base;
+  padding: $space-base;
   background: $bg-card;
   border-top: 1rpx solid $border-color;
   @include safe-area-bottom;

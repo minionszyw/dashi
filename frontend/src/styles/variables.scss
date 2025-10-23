@@ -1,88 +1,97 @@
 /**
- * 全局设计变量
- * 参考：苹果设计规范 + 微信设计语言
+ * 设计变量 - 极简复古风格
+ * 灵感来源：中国传统水墨画 + 现代极简主义
  */
 
 // ============================================
-// 主题色彩
+// 主题色彩 - 水墨复古配色
 // ============================================
-// 主色调（优雅的紫色，保持品牌识别）
-$primary: #667eea;
-$primary-light: #818cf8;
-$primary-dark: #5568d3;
-$primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+// 主色：深墨色
+$primary: #2c3e50;
+$primary-light: #34495e;
+$primary-dark: #1a252f;
+
+// 辅助色：古铜金
+$accent: #c9a87c;
+$accent-light: #d4b896;
+$accent-dark: #a68a5f;
 
 // 功能色
-$success: #07c160;  // 微信绿
-$warning: #ff976a;
-$error: #ee0a24;
-$info: #1989fa;
+$success: #52c41a;
+$warning: #fa8c16;
+$error: #f5222d;
+$info: #1890ff;
 
-// 中性色（参考苹果系统）
-$text-primary: #000000;
-$text-secondary: #666666;
-$text-tertiary: #999999;
-$text-disabled: #c8c9cc;
+// 中性色系（水墨渐变）
+$text-primary: #1a1a1a;      // 浓墨
+$text-secondary: #595959;     // 中墨
+$text-tertiary: #8c8c8c;      // 淡墨
+$text-disabled: #bfbfbf;      // 轻墨
+$text-inverse: #ffffff;       // 反色
 
-$bg-page: #f7f8fa;        // 页面背景
-$bg-card: #ffffff;         // 卡片背景
-$bg-hover: #f2f3f5;        // 悬停背景
-$border-color: #ebedf0;    // 边框颜色
-$divider: #e5e5e5;         // 分割线
+// 背景色（宣纸质感）
+$bg-page: #f8f6f1;            // 宣纸黄
+$bg-card: #ffffff;            // 纯白
+$bg-hover: #fafaf8;           // 淡黄
+$bg-mask: rgba(0, 0, 0, 0.45);// 半透明遮罩
+
+// 边框和分割线（淡墨线）
+$border-color: #e8e6df;
+$border-light: #f0ede5;
+$divider: #d9d9d9;
 
 // ============================================
 // 字体系统
 // ============================================
-$font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+$font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 
+              'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
 
-// 字号（使用 rpx，基于 750px 设计稿）
-$font-size-xs: 20rpx;      // 10px
-$font-size-sm: 24rpx;      // 12px
-$font-size-base: 28rpx;    // 14px
-$font-size-md: 32rpx;      // 16px
-$font-size-lg: 36rpx;      // 18px
-$font-size-xl: 40rpx;      // 20px
-$font-size-xxl: 48rpx;     // 24px
-$font-size-xxxl: 64rpx;    // 32px
+// 字号（基于750px设计稿）
+$font-xs: 20rpx;      // 10px - 辅助文字
+$font-sm: 24rpx;      // 12px - 次要文字
+$font-base: 28rpx;    // 14px - 正文
+$font-md: 32rpx;      // 16px - 小标题
+$font-lg: 36rpx;      // 18px - 标题
+$font-xl: 40rpx;      // 20px - 大标题
+$font-xxl: 48rpx;     // 24px - 特大标题
+$font-xxxl: 64rpx;    // 32px - 超大标题
 
 // 字重
-$font-weight-light: 300;
-$font-weight-normal: 400;
-$font-weight-medium: 500;
-$font-weight-semibold: 600;
-$font-weight-bold: 700;
+$weight-light: 300;
+$weight-normal: 400;
+$weight-medium: 500;
+$weight-semibold: 600;
+$weight-bold: 700;
 
 // ============================================
 // 间距系统（8的倍数）
 // ============================================
-$spacing-xs: 8rpx;         // 4px
-$spacing-sm: 16rpx;        // 8px
-$spacing-md: 24rpx;        // 12px
-$spacing-base: 32rpx;      // 16px
-$spacing-lg: 40rpx;        // 20px
-$spacing-xl: 48rpx;        // 24px
-$spacing-xxl: 64rpx;       // 32px
-$spacing-xxxl: 96rpx;      // 48px
+$space-xs: 8rpx;      // 4px
+$space-sm: 16rpx;     // 8px
+$space-md: 24rpx;     // 12px
+$space-base: 32rpx;   // 16px
+$space-lg: 40rpx;     // 20px
+$space-xl: 48rpx;     // 24px
+$space-xxl: 64rpx;    // 32px
+$space-xxxl: 96rpx;   // 48px
 
 // ============================================
-// 圆角
+// 圆角（极简风格，统一使用小圆角）
 // ============================================
-$radius-xs: 4rpx;          // 2px
-$radius-sm: 8rpx;          // 4px
-$radius-md: 12rpx;         // 6px
-$radius-base: 16rpx;       // 8px
-$radius-lg: 24rpx;         // 12px
-$radius-xl: 32rpx;         // 16px
-$radius-round: 999rpx;     // 圆形
+$radius-xs: 4rpx;     // 2px
+$radius-sm: 8rpx;     // 4px
+$radius-base: 12rpx;  // 6px
+$radius-lg: 16rpx;    // 8px
+$radius-xl: 24rpx;    // 12px
+$radius-round: 999rpx;// 圆形
 
 // ============================================
-// 阴影（苹果风格的细腻阴影）
+// 阴影（极简淡雅）
 // ============================================
-$shadow-xs: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-$shadow-sm: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-$shadow-md: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 12rpx 32rpx rgba(0, 0, 0, 0.10);
-$shadow-xl: 0 16rpx 48rpx rgba(0, 0, 0, 0.12);
+$shadow-sm: 0 2rpx 8rpx 0 rgba(0, 0, 0, 0.04);
+$shadow-base: 0 4rpx 12rpx 0 rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 8rpx 20rpx 0 rgba(0, 0, 0, 0.08);
+$shadow-xl: 0 12rpx 32rpx 0 rgba(0, 0, 0, 0.12);
 
 // ============================================
 // 动画
@@ -94,27 +103,21 @@ $duration-slow: 0.5s;
 $ease-in: cubic-bezier(0.4, 0, 1, 1);
 $ease-out: cubic-bezier(0, 0, 0.2, 1);
 $ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-$ease-apple: cubic-bezier(0.25, 0.1, 0.25, 1);  // 苹果标准缓动
 
 // ============================================
 // 布局
 // ============================================
 $safe-area-bottom: env(safe-area-inset-bottom);
-$status-bar-height: 44px;
-$nav-bar-height: 44px;
-$tab-bar-height: 50px;
+$page-padding: $space-base;
 
-// 页面边距
-$page-padding: $spacing-base;
-
-// Z-index 层级
-$z-index-popup: 1000;
-$z-index-modal: 2000;
-$z-index-toast: 3000;
+// Z-index层级
+$z-popup: 1000;
+$z-modal: 2000;
+$z-toast: 3000;
 
 // ============================================
-// 微信特定
+// 响应式断点
 // ============================================
-$wechat-green: #07c160;
-$wechat-bg: #ededed;
-
+$breakpoint-sm: 375px;  // 小屏手机
+$breakpoint-md: 750px;  // 大屏手机
+$breakpoint-lg: 1024px; // 平板

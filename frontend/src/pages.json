@@ -5,14 +5,14 @@
 			"style": {
 				"navigationBarTitleText": "登录",
 				"navigationStyle": "custom",
-				"backgroundColor": "#f7f8fa"
+				"backgroundColor": "#f8f6f1"
 			}
 		},
 	{
 		"path": "pages/chat/index",
 		"style": {
-			"navigationBarTitleText": "AI对话",
-			"backgroundColor": "#f7f8fa",
+			"navigationBarTitleText": "对话",
+			"backgroundColor": "#f8f6f1",
 			"navigationBarBackgroundColor": "#ffffff",
 			"navigationBarTextStyle": "black"
 		}
@@ -22,14 +22,14 @@
 		"style": {
 			"navigationBarTitleText": "会话",
 			"navigationStyle": "custom",
-			"backgroundColor": "#f7f8fa"
+			"backgroundColor": "#f8f6f1"
 		}
 	},
 	{
 		"path": "pages/profile/index",
 		"style": {
 			"navigationBarTitleText": "我的",
-			"backgroundColor": "#f7f8fa",
+			"backgroundColor": "#f8f6f1",
 			"navigationBarBackgroundColor": "#ffffff",
 			"navigationBarTextStyle": "black"
 		}
@@ -38,7 +38,7 @@
 			"path": "pages/profile/bazi",
 			"style": {
 				"navigationBarTitleText": "排盘结果",
-				"backgroundColor": "#f7f8fa",
+				"backgroundColor": "#f8f6f1",
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
@@ -47,7 +47,7 @@
 			"path": "pages/profile/recharge",
 			"style": {
 				"navigationBarTitleText": "充值中心",
-				"backgroundColor": "#f7f8fa",
+				"backgroundColor": "#f8f6f1",
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
@@ -56,7 +56,7 @@
 			"path": "pages/profile/edit",
 			"style": {
 				"navigationBarTitleText": "编辑资料",
-				"backgroundColor": "#f7f8fa",
+				"backgroundColor": "#f8f6f1",
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
@@ -65,15 +65,15 @@
 			"path": "pages/profile/settings",
 			"style": {
 				"navigationBarTitleText": "系统设置",
-				"backgroundColor": "#f7f8fa",
+				"backgroundColor": "#f8f6f1",
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
 		}
 	],
 	"tabBar": {
-		"color": "#999999",
-		"selectedColor": "#667eea",
+		"color": "#8c8c8c",
+		"selectedColor": "#c9a87c",
 		"backgroundColor": "#ffffff",
 		"borderStyle": "white",
 		"list": [
@@ -93,9 +93,9 @@
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "大师AI命理",
+		"navigationBarTitleText": "大师命理",
 		"navigationBarBackgroundColor": "#ffffff",
-		"backgroundColor": "#f7f8fa",
+		"backgroundColor": "#f8f6f1",
 		"enablePullDownRefresh": false
 	},
 	"easycom": {

@@ -1,7 +1,23 @@
-<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-  <rect width="200" height="200" fill="#f5f5f5"/>
-  <circle cx="100" cy="80" r="30" fill="#d9d9d9"/>
-  <rect x="60" y="120" width="80" height="10" rx="5" fill="#d9d9d9"/>
-  <rect x="70" y="140" width="60" height="10" rx="5" fill="#d9d9d9"/>
-  <text x="100" y="175" font-family="Arial" font-size="14" fill="#999" text-anchor="middle">暂无对话</text>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景圆 -->
+  <circle cx="100" cy="100" r="90" fill="#f8f6f1" stroke="#e8e6df" stroke-width="2"/>
+  
+  <!-- 大消息气泡 -->
+  <g opacity="0.6">
+    <path d="M 50,70 L 120,70 Q 130,70 130,80 L 130,110 Q 130,120 120,120 L 80,120 L 65,135 L 65,120 L 50,120 Q 40,120 40,110 L 40,80 Q 40,70 50,70 Z" 
+          fill="none" stroke="#c9a87c" stroke-width="2"/>
+    <line x1="50" y1="85" x2="110" y2="85" stroke="#c9a87c" stroke-width="2" stroke-linecap="round"/>
+    <line x1="50" y1="95" x2="100" y2="95" stroke="#c9a87c" stroke-width="2" stroke-linecap="round"/>
+    <line x1="50" y1="105" x2="90" y2="105" stroke="#c9a87c" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- 小消息气泡 -->
+  <g opacity="0.4">
+    <path d="M 110,95 L 150,95 Q 155,95 155,100 L 155,115 Q 155,120 150,120 L 135,120 L 130,128 L 130,120 Q 125,120 125,115 L 125,100 Q 125,95 110,95" 
+          fill="none" stroke="#c9a87c" stroke-width="1.5"/>
+  </g>
+  
+  <!-- 中心装饰 -->
+  <circle cx="100" cy="100" r="3" fill="#c9a87c"/>
 </svg>
+

@@ -16,8 +16,8 @@
           :min="5" 
           :max="20" 
           :step="1"
-          activeColor="#667eea"
-          backgroundColor="#e5e5e5"
+          activeColor="#c9a87c"
+          backgroundColor="#e8e6df"
           block-size="24"
           @change="handleContextChange"
         />
@@ -148,24 +148,24 @@ async function handleSave() {
 .settings-page {
   min-height: 100vh;
   background: $bg-page;
-  padding-bottom: $spacing-xxxl;
+  padding-bottom: $space-xxxl;
 }
 
 .settings-section {
-  margin-top: $spacing-base;
+  margin-top: $space-base;
   background: $bg-card;
-  padding: $spacing-base;
+  padding: $space-base;
 }
 
 .section-title {
-  padding: $spacing-sm 0;
-  font-size: $font-size-sm;
+  padding: $space-sm 0;
+  font-size: $font-sm;
   color: $text-tertiary;
-  font-weight: $font-weight-medium;
+  font-weight: $weight-medium;
 }
 
 .setting-item {
-  padding: $spacing-lg 0;
+  padding: $space-lg 0;
   border-bottom: 1rpx solid $border-color;
   
   &:last-child {
@@ -175,19 +175,19 @@ async function handleSave() {
 
 .item-header {
   @include flex-between;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $space-sm;
 }
 
 .item-label {
-  font-size: $font-size-lg;
+  font-size: $font-lg;
   color: $text-primary;
-  font-weight: $font-weight-semibold;
+  font-weight: $weight-semibold;
 }
 
 .item-value {
-  font-size: $font-size-base;
+  font-size: $font-base;
   color: $primary;
-  font-weight: $font-weight-medium;
+  font-weight: $weight-medium;
   
   &.mode {
     color: $primary;
@@ -195,38 +195,38 @@ async function handleSave() {
 }
 
 .item-desc {
-  font-size: $font-size-sm;
+  font-size: $font-sm;
   color: $text-tertiary;
   line-height: 1.6;
-  margin-bottom: $spacing-base;
+  margin-bottom: $space-base;
 }
 
 .slider {
   width: 100%;
-  margin: $spacing-lg 0 $spacing-sm;
+  margin: $space-lg 0 $space-sm;
 }
 
 .slider-labels {
   @include flex-between;
-  font-size: $font-size-xs;
+  font-size: $font-xs;
   color: $text-tertiary;
 }
 
 .mode-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-base;
-  margin-top: $spacing-base;
+  gap: $space-base;
+  margin-top: $space-base;
 }
 
 .mode-option {
   @include flex-center;
   flex-direction: column;
-  padding: $spacing-lg;
+  padding: $space-lg;
   background: $bg-page;
   border-radius: $radius-lg;
   border: 3rpx solid transparent;
-  transition: all $duration-fast $ease-apple;
+  transition: all $duration-fast $ease-in-out;
   
   &.active {
     background: rgba($primary, 0.1);
@@ -240,23 +240,23 @@ async function handleSave() {
 
 .mode-icon {
   font-size: 48rpx;
-  margin-bottom: $spacing-sm;
+  margin-bottom: $space-sm;
 }
 
 .mode-name {
-  font-size: $font-size-base;
+  font-size: $font-base;
   color: $text-primary;
-  font-weight: $font-weight-medium;
+  font-weight: $weight-medium;
 }
 
 .save-section {
-  padding: $spacing-xxl $spacing-base;
+  padding: $space-xxl $space-base;
 }
 
 .save-button {
   @include btn-primary;
   height: 88rpx;
-  font-size: $font-size-lg;
+  font-size: $font-lg;
 }
 </style>
 

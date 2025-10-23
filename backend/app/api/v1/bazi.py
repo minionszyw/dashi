@@ -112,6 +112,11 @@ async def delete_profile(
     current_user: User = Depends(get_current_user)
 ):
     """删除八字档案"""
+    import logging
+    from app.models.conversation import Conversation
+    
+    logger = logging.getLogger(__name__)
+    
     profile = db.query(BaziProfile).filter(
         BaziProfile.id == profile_id,
         BaziProfile.user_id == current_user.id
@@ -123,8 +128,27 @@ async def delete_profile(
             detail="档案不存在"
         )
     
-    db.delete(profile)
-    db.commit()
-    
-    return {"message": "删除成功"}
+    try:
+        # 先解除所有引用该档案的会话关联
+        affected_conversations = db.query(Conversation).filter(
+            Conversation.bazi_profile_id == profile_id
+        ).update({"bazi_profile_id": None})
+        
+        if affected_conversations > 0:
+            logger.info(f"已解除 {affected_conversations} 个会话的八字档案关联")
+        
+        # 再删除档案
+        db.delete(profile)
+        db.commit()
+        
+        logger.info(f"八字档案删除成功: profile_id={profile_id}")
+        return {"message": "删除成功"}
+        
+    except Exception as e:
+        logger.error(f"删除八字档案失败: {str(e)}", exc_info=True)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"删除失败：{str(e)}"
+        )
 

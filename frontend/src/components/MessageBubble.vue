@@ -21,12 +21,12 @@
       </view>
       <image 
         class="avatar" 
-        :src="userStore.user?.avatar_url || '/static/default-avatar.svg'" 
+        :src="userStore.user?.avatar_url || '/static/user-avatar.svg'" 
         mode="aspectFill" 
       />
     </template>
   </view>
- </template>
+</template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
@@ -42,7 +42,7 @@ const props = defineProps<Props>()
 
 const userStore = useUserStore()
 
-// 格式化消息时间（微信样式：仅显示时分）
+// 格式化消息时间
 function formatMessageTime(timestamp: string): string {
   const now = new Date()
   const msgDate = new Date(timestamp)
@@ -52,17 +52,13 @@ function formatMessageTime(timestamp: string): string {
   const diffDays = Math.floor((today.getTime() - msgDay.getTime()) / (24 * 60 * 60 * 1000))
   
   if (diffDays === 0) {
-    // 今天：只显示时间
     return formatDateTime(timestamp, 'HH:mm')
   } else if (diffDays === 1) {
-    // 昨天
     return '昨天 ' + formatDateTime(timestamp, 'HH:mm')
   } else if (diffDays < 7) {
-    // 一周内：显示星期
     const weekDays = ['日', '一', '二', '三', '四', '五', '六']
     return '星期' + weekDays[msgDate.getDay()] + ' ' + formatDateTime(timestamp, 'HH:mm')
   } else {
-    // 更早：显示日期
     return formatDateTime(timestamp, 'MM-DD HH:mm')
   }
 }
@@ -73,9 +69,9 @@ function formatMessageTime(timestamp: string): string {
 @import '@/styles/variables.scss';
 
 .message-bubble {
-  display: flex;
+  @include flex-center-y;
   align-items: flex-start;
-  margin-bottom: $spacing-lg;
+  margin-bottom: $space-lg;
   animation: fadeIn 0.3s ease;
 
   // 用户消息（右侧）
@@ -84,12 +80,16 @@ function formatMessageTime(timestamp: string): string {
 
     .bubble-wrapper {
       align-items: flex-end;
-      margin-right: $spacing-md;
+      margin-right: $space-md;
     }
 
     .bubble-content {
-      background: #95ec69;
-      border-radius: 10rpx 2rpx 10rpx 10rpx;
+      background: $primary;
+      border-radius: $radius-lg $radius-xs $radius-lg $radius-lg;
+      
+      .content {
+        color: $text-inverse;
+      }
     }
 
     .time {
@@ -101,12 +101,13 @@ function formatMessageTime(timestamp: string): string {
   &.assistant {
     .bubble-wrapper {
       align-items: flex-start;
-      margin-left: $spacing-md;
+      margin-left: $space-md;
     }
 
     .bubble-content {
-      background: #ffffff;
-      border-radius: 2rpx 10rpx 10rpx 10rpx;
+      background: $bg-card;
+      border: 1rpx solid $border-light;
+      border-radius: $radius-xs $radius-lg $radius-lg $radius-lg;
     }
   }
 }
@@ -114,25 +115,24 @@ function formatMessageTime(timestamp: string): string {
 .avatar {
   width: 80rpx;
   height: 80rpx;
-  border-radius: 10rpx;
+  border-radius: $radius-base;
   flex-shrink: 0;
-  background: #f0f2f5;
+  background: $bg-hover;
 }
 
 .bubble-wrapper {
-  display: flex;
-  flex-direction: column;
-  max-width: 70%; // 使用相对宽度，更好适配不同屏幕尺寸
-  gap: $spacing-xs;
+  @include flex-column;
+  max-width: 70%;
+  gap: $space-xs;
 }
 
 .bubble-content {
-  padding: 20rpx 24rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  padding: $space-base $space-lg;
+  box-shadow: $shadow-sm;
 }
 
 .content {
-  font-size: 30rpx;
+  font-size: $font-base;
   line-height: 1.6;
   color: $text-primary;
   word-break: break-word;
@@ -140,9 +140,9 @@ function formatMessageTime(timestamp: string): string {
 }
 
 .time {
-  font-size: 20rpx;
+  font-size: $font-xs;
   color: $text-tertiary;
-  padding: 0 $spacing-sm;
+  padding: 0 $space-sm;
 }
 
 @keyframes fadeIn {
@@ -156,4 +156,3 @@ function formatMessageTime(timestamp: string): string {
   }
 }
 </style>
-
