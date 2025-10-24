@@ -7,7 +7,7 @@
         <view class="logo-wrapper">
           <image src="/static/logo.svg" mode="aspectFit" class="logo" />
         </view>
-        <text class="app-name">大师命理</text>
+        <text class="app-name">国学大师</text>
         <text class="app-slogan">专业八字排盘 · AI智能解析</text>
       </view>
       
@@ -132,16 +132,14 @@ function navigateToHome() {
 }
 
 function handlePrivacy() {
-  uni.showToast({
-    title: '隐私政策',
-    icon: 'none'
+  uni.navigateTo({
+    url: '/pages/login/privacy'
   })
 }
 
 function handleTerms() {
-  uni.showToast({
-    title: '用户协议',
-    icon: 'none'
+  uni.navigateTo({
+    url: '/pages/login/terms'
   })
 }
 </script>

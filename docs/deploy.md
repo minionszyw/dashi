@@ -3,87 +3,81 @@
 ## 部署架构
 
 ```
-                   Internet
-                      │
-                      ↓
-              ┌──────────────┐
-              │   CDN/域名    │
-              └───────┬──────┘
-                      │
-                      ↓
-              ┌──────────────┐
-              │    Nginx      │
-              │  (反向代理)    │
-              └───────┬──────┘
-                      │
-        ┌─────────────┼─────────────┐
-        │                           │
-        ↓                           ↓
-┌──────────────┐            ┌──────────────┐
-│ FastAPI后端   │            │  静态资源     │
-│ (Docker)     │            │              │
-└───────┬──────┘            └──────────────┘
-        │
-   ┌────┴────┐
-   ↓         ↓
-┌────────┐ ┌────────┐
-│Postgres│ │ Redis  │
-└────────┘ └────────┘
+┌─────────────────────────────────────────────┐
+│              Nginx (反向代理)                 │
+│         https://yourdomain.com               │
+└──────────────┬──────────────────────────────┘
+               │
+    ┌──────────┼──────────┐
+    │                     │
+    ↓                     ↓
+┌─────────┐         ┌─────────┐
+│  后端   │         │  前端   │
+│ FastAPI │         │  静态   │
+│  8000   │         │  网页   │
+└────┬────┘         └─────────┘
+     │
+  ┌──┴──┐
+  ↓     ↓
+┌────┐ ┌────┐
+│ PG │ │Redis│
+└────┘ └────┘
 ```
 
 ## 服务器要求
 
-### 最小配置（30人在线）
+### 最低配置
+
 - **CPU**：2核
 - **内存**：4GB
 - **硬盘**：40GB SSD
 - **带宽**：5Mbps
-- **操作系统**：Ubuntu 20.04/22.04 LTS
+- **操作系统**：Ubuntu 20.04+ / CentOS 8+
 
-### 推荐配置（100人在线）
-- **CPU**：4核
-- **内存**：8GB
+### 推荐配置（生产环境）
+
+- **CPU**：4核+
+- **内存**：8GB+
 - **硬盘**：100GB SSD
-- **带宽**：10Mbps
-- **操作系统**：Ubuntu 22.04 LTS
+- **带宽**：10Mbps+
 
 ## 准备工作
 
-### 1. 域名准备
+### 1. 域名与SSL证书
 
 ```bash
-# 需要准备的域名
-api.yourdomain.com      # API服务
-h5.yourdomain.com       # H5页面（可选）
+# 购买域名并解析到服务器IP
+A记录: @ -> 服务器IP
+A记录: www -> 服务器IP
+
+# 申请SSL证书（Let's Encrypt免费）
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ```
 
-### 2. SSL证书
+### 2. 安装Docker
 
 ```bash
-# 使用Let's Encrypt免费证书
-sudo apt install certbot
-sudo certbot certonly --standalone -d api.yourdomain.com
-```
-
-### 3. 服务器基础环境
-
-```bash
-# 更新系统
-sudo apt update && sudo apt upgrade -y
-
 # 安装Docker
-curl -fsSL https://get.docker.com | sh
-sudo usermod -aG docker $USER
+curl -fsSL https://get.docker.com | sudo sh
 
 # 安装Docker Compose
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
-# 安装Nginx
-sudo apt install nginx -y
+# 验证安装
+docker --version
+docker-compose --version
+```
 
-# 安装Git
-sudo apt install git -y
+### 3. 配置防火墙
+
+```bash
+# 开放必要端口
+sudo ufw allow 22/tcp    # SSH
+sudo ufw allow 80/tcp    # HTTP
+sudo ufw allow 443/tcp   # HTTPS
+sudo ufw enable
 ```
 
 ## Docker部署（推荐）
@@ -91,236 +85,107 @@ sudo apt install git -y
 ### 1. 克隆项目
 
 ```bash
-cd /opt
-sudo git clone <repository-url> dashi
+git clone <repository-url>
 cd dashi
-sudo chown -R $USER:$USER /opt/dashi
 ```
 
 ### 2. 配置环境变量
 
 ```bash
-# 创建后端环境变量
-cp .env.example backend/.env
-nano backend/.env
+# 复制并编辑配置文件
+cp backend/.env.example backend/.env
+vim backend/.env
 ```
 
-重要配置项：
-```env
-# 生产环境配置
-DEBUG=False
-ENVIRONMENT=production
-
-# 数据库（使用Docker内部网络）
-DATABASE_URL=postgresql://dashi:your-strong-password@postgres:5432/dashi
-REDIS_URL=redis://redis:6379/0
-
-# 微信配置
-WX_APPID=your-real-appid
-WX_SECRET=your-real-secret
-
-# OpenAI配置
-OPENAI_API_KEY=sk-your-real-key
-
-# 安全配置（生成随机密钥）
-JWT_SECRET_KEY=$(openssl rand -hex 32)
-
-# 微信支付
-WX_MCH_ID=your-mch-id
-WX_API_KEY=your-api-key
-```
-
-### 3. 创建生产环境Docker配置
-
-```yaml
-# docker-compose.prod.yml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:15-alpine
-    container_name: dashi_postgres
-    environment:
-      POSTGRES_DB: dashi
-      POSTGRES_USER: dashi
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - dashi_network
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dashi"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: dashi_redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    volumes:
-      - redis_data:/data
-    networks:
-      - dashi_network
-    restart: always
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile.prod
-    container_name: dashi_backend
-    env_file:
-      - ./backend/.env
-    ports:
-      - "8000:8000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - dashi_network
-    restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-volumes:
-  postgres_data:
-  redis_data:
-
-networks:
-  dashi_network:
-    driver: bridge
-```
-
-### 4. 创建生产环境Dockerfile
-
-```dockerfile
-# backend/Dockerfile.prod
-FROM python:3.12-slim
-
-WORKDIR /app
-
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    gcc \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
-
-# 复制依赖文件
-COPY requirements.txt .
-
-# 安装Python依赖
-RUN pip install --no-cache-dir -r requirements.txt
-
-# 复制应用代码
-COPY . .
-
-# 创建非root用户
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
-
-# 暴露端口
-EXPOSE 8000
-
-# 启动命令（使用Gunicorn + Uvicorn workers）
-CMD ["gunicorn", "app.main:app", \
-     "--workers", "4", \
-     "--worker-class", "uvicorn.workers.UvicornWorker", \
-     "--bind", "0.0.0.0:8000", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
-```
-
-### 5. 启动服务
+**必填配置**：
 
 ```bash
-# 构建并启动
-docker-compose -f docker-compose.prod.yml up -d --build
+# 数据库配置
+DATABASE_URL=postgresql://postgres:your_password@postgres:5432/dashi
 
-# 查看日志
-docker-compose -f docker-compose.prod.yml logs -f backend
+# Redis配置
+REDIS_URL=redis://redis:6379/0
 
-# 运行数据库迁移
-docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
+# JWT密钥（随机生成）
+SECRET_KEY=your_secret_key_here
+
+# OpenAI配置
+OPENAI_API_KEY=sk-your_openai_api_key
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-3.5-turbo
+
+# 微信小程序配置
+WX_APPID=your_wx_appid
+WX_SECRET=your_wx_secret
 ```
 
-### 6. 配置Nginx
+### 3. 启动服务
+
+```bash
+# 启动所有服务
+sudo docker-compose up -d
+
+# 查看运行状态
+sudo docker-compose ps
+
+# 查看日志
+sudo docker-compose logs -f
+```
+
+### 4. 初始化数据库
+
+```bash
+# 进入后端容器
+sudo docker exec -it dashi-backend bash
+
+# 执行数据库迁移
+alembic upgrade head
+
+# 退出容器
+exit
+```
+
+### 5. 配置Nginx
 
 ```nginx
 # /etc/nginx/sites-available/dashi
-upstream backend {
-    server localhost:8000;
-    keepalive 64;
-}
-
 server {
     listen 80;
-    server_name api.yourdomain.com;
+    server_name yourdomain.com www.yourdomain.com;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name api.yourdomain.com;
+    server_name yourdomain.com www.yourdomain.com;
 
-    # SSL证书
-    ssl_certificate /etc/letsencrypt/live/api.yourdomain.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api.yourdomain.com/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
 
-    # 日志
-    access_log /var/log/nginx/dashi_access.log;
-    error_log /var/log/nginx/dashi_error.log;
-
-    # 请求体大小限制
-    client_max_body_size 10M;
-
-    # 代理设置
-    location / {
-        proxy_pass http://backend;
+    # 后端API
+    location /api {
+        proxy_pass http://localhost:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         
-        # WebSocket支持
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        
-        # 超时设置
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
+        # SSE支持
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
     }
 
-    # 静态文件缓存
-    location /static {
-        alias /opt/dashi/backend/static;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # 健康检查
-    location /health {
-        access_log off;
-        proxy_pass http://backend;
+    # 前端静态文件
+    location / {
+        root /var/www/dashi;
+        try_files $uri $uri/ /index.html;
     }
 }
 ```
 
 启用配置：
+
 ```bash
 sudo ln -s /etc/nginx/sites-available/dashi /etc/nginx/sites-enabled/
 sudo nginx -t
@@ -329,258 +194,141 @@ sudo systemctl reload nginx
 
 ## 前端部署
 
-### 微信小程序
-
-#### 1. 构建生产版本
+### 1. 构建前端
 
 ```bash
 cd frontend
 
-# 配置生产环境API地址
-# 编辑 .env.production
-VITE_API_BASE_URL=https://api.yourdomain.com
+# 安装依赖
+npm install
 
-# 构建
+# H5构建
+npm run build:h5
+
+# 微信小程序构建
 npm run build:mp-weixin
 ```
 
-#### 2. 上传微信平台
-
-1. 打开微信开发者工具
-2. 导入项目：`frontend/dist/build/mp-weixin`
-3. 点击"上传"
-4. 填写版本号和项目备注
-5. 提交审核
-
-#### 3. 配置服务器域名
-
-在微信公众平台配置：
-- **request合法域名**：`https://api.yourdomain.com`
-- **socket合法域名**：`wss://api.yourdomain.com`（如使用WebSocket）
-- **uploadFile合法域名**：`https://api.yourdomain.com`
-- **downloadFile合法域名**：`https://api.yourdomain.com`
-
-### H5部署（可选）
+### 2. 部署H5
 
 ```bash
-# 构建H5版本
-npm run build:h5
-
-# 将构建产物上传到服务器
-scp -r dist/build/h5/* user@server:/var/www/h5
+# 复制构建产物到Nginx目录
+sudo cp -r dist/build/h5/* /var/www/dashi/
 ```
 
-Nginx配置：
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name h5.yourdomain.com;
-    
-    root /var/www/h5;
-    index index.html;
-    
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
+### 3. 微信小程序上传
+
+1. 打开微信开发者工具
+2. 导入 `frontend/dist/build/mp-weixin`
+3. 点击"上传"
+4. 填写版本号和备注
+5. 提交审核
 
 ## 数据库管理
 
 ### 备份
 
 ```bash
-# 创建备份脚本
-cat > /opt/dashi/backup.sh << 'EOF'
-#!/bin/bash
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/opt/dashi/backups"
-mkdir -p $BACKUP_DIR
+# 备份数据库
+sudo docker exec dashi-postgres pg_dump -U postgres dashi > backup_$(date +%Y%m%d).sql
 
-# 备份PostgreSQL
-docker-compose -f /opt/dashi/docker-compose.prod.yml exec -T postgres \
-    pg_dump -U dashi dashi | gzip > $BACKUP_DIR/db_$DATE.sql.gz
-
-# 保留最近7天的备份
-find $BACKUP_DIR -name "db_*.sql.gz" -mtime +7 -delete
-
-echo "Backup completed: $BACKUP_DIR/db_$DATE.sql.gz"
-EOF
-
-chmod +x /opt/dashi/backup.sh
-
-# 设置定时任务（每天凌晨2点）
-(crontab -l 2>/dev/null; echo "0 2 * * * /opt/dashi/backup.sh") | crontab -
+# 定时备份（每天凌晨3点）
+crontab -e
+0 3 * * * /home/ubuntu/backup.sh
 ```
 
 ### 恢复
 
 ```bash
 # 恢复数据库
-gunzip -c backups/db_20251018_020000.sql.gz | \
-docker-compose -f docker-compose.prod.yml exec -T postgres \
-    psql -U dashi dashi
+sudo docker exec -i dashi-postgres psql -U postgres dashi < backup_20250101.sql
 ```
 
 ## 监控与日志
 
-### 1. 日志查看
+### 查看日志
 
 ```bash
-# 查看后端日志
-docker-compose -f docker-compose.prod.yml logs -f backend
+# 查看所有服务日志
+sudo docker-compose logs -f
 
-# 查看Nginx日志
-sudo tail -f /var/log/nginx/dashi_access.log
-sudo tail -f /var/log/nginx/dashi_error.log
+# 查看指定服务日志
+sudo docker-compose logs -f backend
+sudo docker-compose logs -f postgres
 
-# 查看数据库日志
-docker-compose -f docker-compose.prod.yml logs postgres
+# 查看最近100行
+sudo docker-compose logs --tail=100 backend
 ```
 
-### 2. 性能监控
-
-#### 安装监控工具
+### 日志切割
 
 ```bash
-# 安装htop（资源监控）
-sudo apt install htop
-
-# 安装ctop（容器监控）
-sudo wget https://github.com/bcicen/ctop/releases/download/v0.7.7/ctop-0.7.7-linux-amd64 -O /usr/local/bin/ctop
-sudo chmod +x /usr/local/bin/ctop
+# /etc/logrotate.d/dashi
+/var/log/dashi/*.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+}
 ```
 
-#### 使用Prometheus + Grafana（进阶）
+### 监控工具（可选）
 
-```yaml
-# 添加到docker-compose.prod.yml
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    ports:
-      - "9090:9090"
-    networks:
-      - dashi_network
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    networks:
-      - dashi_network
-```
-
-### 3. 告警配置
-
-```bash
-# 创建健康检查脚本
-cat > /opt/dashi/healthcheck.sh << 'EOF'
-#!/bin/bash
-ENDPOINT="https://api.yourdomain.com/health"
-RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $ENDPOINT)
-
-if [ $RESPONSE != "200" ]; then
-    echo "Health check failed! Status: $RESPONSE"
-    # 发送告警（邮件/钉钉/企业微信）
-    curl -X POST "your-alert-webhook-url" \
-        -H "Content-Type: application/json" \
-        -d '{"text":"API服务异常，请检查！"}'
-fi
-EOF
-
-chmod +x /opt/dashi/healthcheck.sh
-
-# 每5分钟检查一次
-(crontab -l 2>/dev/null; echo "*/5 * * * * /opt/dashi/healthcheck.sh") | crontab -
-```
+- **Prometheus + Grafana**：系统监控
+- **Sentry**：错误追踪
+- **Uptime Kuma**：服务可用性监控
 
 ## 更新部署
 
-### 滚动更新
-
 ```bash
-cd /opt/dashi
-
 # 拉取最新代码
 git pull origin main
 
-# 重新构建并启动（零停机）
-docker-compose -f docker-compose.prod.yml up -d --build --no-deps backend
+# 重新构建并启动
+sudo docker-compose down
+sudo docker-compose up -d --build
 
-# 运行迁移
-docker-compose -f docker-compose.prod.yml exec backend alembic upgrade head
-
-# 查看状态
-docker-compose -f docker-compose.prod.yml ps
-```
-
-### 回滚
-
-```bash
-# 查看提交历史
-git log --oneline
-
-# 回滚到指定版本
-git checkout <commit-hash>
-
-# 重新部署
-docker-compose -f docker-compose.prod.yml up -d --build backend
+# 执行数据库迁移（如果有）
+sudo docker exec dashi-backend alembic upgrade head
 ```
 
 ## 安全加固
 
-### 1. 防火墙配置
+### 1. SSH安全
 
 ```bash
-# 安装ufw
-sudo apt install ufw
+# 禁用root登录
+sudo vim /etc/ssh/sshd_config
+PermitRootLogin no
 
-# 允许SSH
-sudo ufw allow 22/tcp
+# 修改SSH端口
+Port 2222
 
-# 允许HTTP/HTTPS
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-
-# 启用防火墙
-sudo ufw enable
+# 重启SSH
+sudo systemctl restart sshd
 ```
 
-### 2. 限流配置
-
-Nginx限流：
-```nginx
-# 在http块中添加
-limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
-
-# 在location块中使用
-location /api {
-    limit_req zone=api_limit burst=20 nodelay;
-    proxy_pass http://backend;
-}
-```
-
-### 3. fail2ban防止暴力破解
+### 2. 数据库安全
 
 ```bash
-sudo apt install fail2ban
+# 修改默认密码
+ALTER USER postgres WITH PASSWORD 'strong_password';
 
-# 创建配置
-sudo nano /etc/fail2ban/jail.local
+# 限制远程访问
+# postgresql.conf
+listen_addresses = 'localhost'
 ```
 
-```ini
-[nginx-limit-req]
-enabled = true
-filter = nginx-limit-req
-logpath = /var/log/nginx/dashi_error.log
-maxretry = 5
-bantime = 3600
+### 3. 定期更新
+
+```bash
+# 更新系统
+sudo apt update && sudo apt upgrade -y
+
+# 更新Docker镜像
+sudo docker-compose pull
+sudo docker-compose up -d
 ```
 
 ## 性能优化
@@ -588,92 +336,106 @@ bantime = 3600
 ### 1. 数据库优化
 
 ```sql
--- 创建必要索引
-CREATE INDEX IF NOT EXISTS idx_conversations_user_created 
-ON conversations(user_id, created_at DESC) 
-WHERE deleted_at IS NULL;
+-- 创建索引
+CREATE INDEX idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX idx_conversations_user ON conversations(user_id);
 
-CREATE INDEX IF NOT EXISTS idx_messages_conversation_created 
-ON messages(conversation_id, created_at DESC);
-
--- 定期清理
-VACUUM ANALYZE;
+-- 清理旧数据（可选）
+DELETE FROM messages WHERE created_at < NOW() - INTERVAL '90 days';
 ```
 
-### 2. Redis配置优化
+### 2. Redis缓存
 
-```conf
-# redis.conf
-maxmemory 512mb
-maxmemory-policy allkeys-lru
-save 900 1
-save 300 10
-save 60 10000
+```python
+# 缓存热点数据
+# - 用户信息（TTL: 1小时）
+# - 会话列表（TTL: 10分钟）
+# - 八字结果（TTL: 1天）
 ```
 
-### 3. Nginx缓存
+### 3. Nginx优化
 
 ```nginx
-# 添加缓存配置
-proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=api_cache:10m max_size=1g inactive=60m;
+# 启用Gzip压缩
+gzip on;
+gzip_types text/plain text/css application/json application/javascript;
 
-location /api/v1/bazi/profiles {
-    proxy_cache api_cache;
-    proxy_cache_valid 200 5m;
-    proxy_pass http://backend;
+# 静态资源缓存
+location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+    expires 7d;
+    add_header Cache-Control "public, immutable";
 }
 ```
 
 ## 故障排查
 
-### 常见问题
+### 1. 服务无法启动
 
-1. **服务无法启动**
 ```bash
 # 查看详细日志
-docker-compose -f docker-compose.prod.yml logs backend
+sudo docker-compose logs backend
 
 # 检查端口占用
-sudo netstat -tlnp | grep 8000
+sudo netstat -tunlp | grep 8000
+
+# 重启服务
+sudo docker-compose restart backend
 ```
 
-2. **数据库连接失败**
+### 2. 数据库连接失败
+
 ```bash
-# 进入容器检查
-docker-compose -f docker-compose.prod.yml exec backend bash
-psql -h postgres -U dashi -d dashi
+# 检查PostgreSQL状态
+sudo docker-compose ps postgres
+
+# 测试连接
+sudo docker exec dashi-postgres psql -U postgres -c "SELECT 1"
+
+# 查看日志
+sudo docker-compose logs postgres
 ```
 
-3. **SSL证书过期**
-```bash
-# 续期证书
-sudo certbot renew
-sudo systemctl reload nginx
-```
+### 3. 内存不足
 
-4. **内存不足**
 ```bash
 # 查看内存使用
 free -h
+docker stats
 
-# 清理Docker缓存
-docker system prune -a
+# 调整容器资源限制（docker-compose.yml）
+services:
+  backend:
+    mem_limit: 2g
+    mem_reservation: 1g
 ```
 
 ## 成本估算
 
-### 云服务器（阿里云/腾讯云）
+### 云服务器（按月）
 
-- **2核4G**：约150元/月
-- **域名**：约60元/年
+- **基础版**：¥100-200/月（2核4G）
+- **标准版**：¥300-500/月（4核8G）
+- **企业版**：¥800-1500/月（8核16G）
+
+### AI服务（按Token）
+
+- **OpenAI GPT-3.5**：$0.002/1K tokens
+- **国产大模型**：¥0.001-0.01/1K tokens
+
+### 其他成本
+
+- **域名**：¥50-100/年
 - **SSL证书**：免费（Let's Encrypt）
-- **OpenAI API**：按使用量计费（预估500-1000元/月）
-
-**总计**：约650-1150元/月
+- **对象存储**：¥0.1-0.5/GB/月
+- **CDN**：¥0.2-0.8/GB
 
 ---
 
-**文档版本**：v1.0  
-**最后更新**：2025-10-18  
-**维护者**：开发团队
+**文档版本**：v2.0  
+**最后更新**：2025-10-23  
+**行数**：约400行（精简版）
 
+> 更多信息请参考：
+> - [开发文档](development.md)
+> - [项目设计](design.md)
+> - [AI对话架构](ai-chat-architecture.md)

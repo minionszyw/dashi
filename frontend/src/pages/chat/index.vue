@@ -94,6 +94,11 @@
               <text class="menu-item-text">新建会话</text>
               <text class="menu-item-arrow">›</text>
             </view>
+            <view class="menu-item" @click="handleSharePoster">
+              <view class="menu-item-icon">📤</view>
+              <text class="menu-item-text">分享海报</text>
+              <text class="menu-item-arrow">›</text>
+            </view>
             <view class="menu-item" @click="handleClearChat">
               <view class="menu-item-icon">✕</view>
               <text class="menu-item-text">清空对话</text>
@@ -106,6 +111,9 @@
         </view>
       </view>
     </uni-popup>
+
+    <!-- 隐藏的Canvas用于生成海报 -->
+    <canvas canvas-id="posterCanvas" style="position: fixed; left: -9999px; width: 375px; height: 667px;"></canvas>
   </view>
 </template>
 
@@ -114,6 +122,7 @@ import { ref, computed, onMounted, nextTick } from 'vue'
 import { useChatStore, useUserStore, useBaziStore } from '@/stores'
 import MessageBubble from '@/components/MessageBubble.vue'
 import { storage } from '@/utils/storage'
+import { generateMiniProgramCode } from '@/api'
 
 const chatStore = useChatStore()
 const userStore = useUserStore()
@@ -368,6 +377,180 @@ async function handleNewConversation() {
       icon: 'none'
     })
   }
+}
+
+// 分享海报
+async function handleSharePoster() {
+  menuPopup.value.close()
+  
+  if (!chatStore.currentConversation) {
+    uni.showToast({
+      title: '请先创建会话',
+      icon: 'none'
+    })
+    return
+  }
+  
+  if (chatStore.messages.length === 0) {
+    uni.showToast({
+      title: '会话内容为空，无法生成海报',
+      icon: 'none'
+    })
+    return
+  }
+  
+  uni.showLoading({
+    title: '生成中...',
+    mask: true
+  })
+  
+  try {
+    // 获取小程序码
+    const codeData = await generateMiniProgramCode(chatStore.currentConversation.id)
+    
+    // 生成海报
+    const posterPath = await generatePoster(codeData.image_base64)
+    
+    // 保存到相册
+    await saveToAlbum(posterPath)
+    
+    uni.showToast({
+      title: '海报已保存到相册',
+      icon: 'success'
+    })
+  } catch (error: any) {
+    console.error('生成海报失败:', error)
+    uni.showToast({
+      title: error.message || '生成失败',
+      icon: 'none'
+    })
+  } finally {
+    uni.hideLoading()
+  }
+}
+
+// 生成海报
+function generatePoster(qrcodeBase64: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const ctx = uni.createCanvasContext('posterCanvas')
+    const pixelRatio = uni.getSystemInfoSync().pixelRatio || 2
+    
+    // 画布尺寸 (单位：px)
+    const canvasWidth = 375
+    const canvasHeight = 667
+    
+    // 背景
+    ctx.setFillStyle('#f8f6f1')
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+    
+    // Logo区域
+    ctx.setFillStyle('#2c3e50')
+    ctx.setFontSize(32)
+    ctx.setTextAlign('center')
+    ctx.fillText('国学大师', canvasWidth / 2, 60)
+    
+    // 副标题
+    ctx.setFillStyle('#666666')
+    ctx.setFontSize(14)
+    ctx.fillText('专业八字排盘 · AI智能解析', canvasWidth / 2, 90)
+    
+    // 装饰线
+    ctx.setStrokeStyle('#c9a87c')
+    ctx.setLineWidth(1)
+    ctx.moveTo(80, 110)
+    ctx.lineTo(295, 110)
+    ctx.stroke()
+    
+    // 会话信息区域
+    const conversation = chatStore.currentConversation
+    const firstMessage = chatStore.messages.length > 0 ? chatStore.messages[0].content : ''
+    
+    ctx.setFillStyle('#2c3e50')
+    ctx.setFontSize(18)
+    ctx.setTextAlign('left')
+    ctx.fillText('我的命理咨询', 40, 150)
+    
+    // 第一条消息（作为标题）
+    if (firstMessage) {
+      const title = firstMessage.length > 20 ? firstMessage.substring(0, 20) + '...' : firstMessage
+      ctx.setFillStyle('#666666')
+      ctx.setFontSize(14)
+      ctx.fillText(title, 40, 180)
+    }
+    
+    // 消息数量
+    ctx.setFillStyle('#999999')
+    ctx.setFontSize(12)
+    ctx.fillText(`共 ${chatStore.messages.length} 条对话`, 40, 210)
+    
+    // 小程序码区域
+    const qrcodeSize = 180
+    const qrcodeX = (canvasWidth - qrcodeSize) / 2
+    const qrcodeY = 280
+    
+    // 绘制小程序码背景
+    ctx.setFillStyle('#ffffff')
+    ctx.fillRect(qrcodeX - 10, qrcodeY - 10, qrcodeSize + 20, qrcodeSize + 20)
+    
+    // 绘制小程序码
+    const qrcodeImage = qrcodeBase64
+    ctx.drawImage(qrcodeImage, qrcodeX, qrcodeY, qrcodeSize, qrcodeSize)
+    
+    // 扫码提示
+    ctx.setFillStyle('#666666')
+    ctx.setFontSize(14)
+    ctx.setTextAlign('center')
+    ctx.fillText('长按识别小程序码查看详情', canvasWidth / 2, qrcodeY + qrcodeSize + 40)
+    
+    // 底部装饰
+    ctx.setFillStyle('#c9a87c')
+    ctx.setFontSize(12)
+    ctx.fillText('传承千年智慧 · 科技赋能国学', canvasWidth / 2, canvasHeight - 40)
+    
+    // 绘制并导出
+    ctx.draw(false, () => {
+      setTimeout(() => {
+        uni.canvasToTempFilePath({
+          canvasId: 'posterCanvas',
+          fileType: 'png',
+          quality: 1,
+          success: (res) => {
+            resolve(res.tempFilePath)
+          },
+          fail: (err) => {
+            reject(new Error('生成海报失败'))
+          }
+        })
+      }, 500)
+    })
+  })
+}
+
+// 保存到相册
+function saveToAlbum(filePath: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    uni.saveImageToPhotosAlbum({
+      filePath,
+      success: () => {
+        resolve()
+      },
+      fail: (err) => {
+        if (err.errMsg.includes('auth deny')) {
+          uni.showModal({
+            title: '需要相册权限',
+            content: '请在设置中开启相册权限',
+            confirmText: '去设置',
+            success: (res) => {
+              if (res.confirm) {
+                uni.openSetting()
+              }
+            }
+          })
+        }
+        reject(new Error('保存失败'))
+      }
+    })
+  })
 }
 
 // 清空对话

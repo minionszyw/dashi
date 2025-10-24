@@ -151,9 +151,8 @@ function handleFeedback() {
 }
 
 function handleAbout() {
-  uni.showToast({
-    title: '大师命理 v1.0.0',
-    icon: 'none'
+  uni.navigateTo({
+    url: '/pages/profile/about'
   })
 }
 

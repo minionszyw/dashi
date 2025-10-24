@@ -69,6 +69,33 @@
 				"navigationBarBackgroundColor": "#ffffff",
 				"navigationBarTextStyle": "black"
 			}
+		},
+		{
+			"path": "pages/profile/about",
+			"style": {
+				"navigationBarTitleText": "关于我们",
+				"backgroundColor": "#f8f6f1",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/login/privacy",
+			"style": {
+				"navigationBarTitleText": "隐私政策",
+				"backgroundColor": "#f8f6f1",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
+		},
+		{
+			"path": "pages/login/terms",
+			"style": {
+				"navigationBarTitleText": "用户协议",
+				"backgroundColor": "#f8f6f1",
+				"navigationBarBackgroundColor": "#ffffff",
+				"navigationBarTextStyle": "black"
+			}
 		}
 	],
 	"tabBar": {
@@ -93,7 +120,7 @@
 	},
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "大师命理",
+		"navigationBarTitleText": "国学大师",
 		"navigationBarBackgroundColor": "#ffffff",
 		"backgroundColor": "#f8f6f1",
 		"enablePullDownRefresh": false

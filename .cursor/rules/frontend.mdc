@@ -11,136 +11,82 @@ alwaysApply: true
 - **Vue 3**：Composition API + `<script setup>`
 - **TypeScript**：类型安全
 - **Pinia**：状态管理
-- **Sass**：样式预处理器（模块化架构）
+- **Sass**：样式预处理器
 
 ## 设计理念
 
-### 极简复古风格
+### 极简复古风格（水墨风格）
 
-项目采用**水墨风格**的极简复古设计，核心理念：
+**核心理念**：
+- 色彩克制：深墨色 + 古铜金
+- 留白为美：充分间距
+- 结构清晰：卡片化布局
+- 交互自然：简洁动画
 
-- **色彩克制**：深墨色 + 古铜金，营造古典氛围
-- **留白为美**：充分的内容间距，突出重点信息
-- **结构清晰**：卡片化布局，层次分明
-- **交互自然**：简洁动画，流畅过渡
-
-### 设计原则
-
-1. **极简至上**：删除一切非必要元素
-2. **响应式**：自适应多端设备（小程序/H5/App）
-3. **一致性**：统一的颜色、字体、间距、圆角
-4. **可维护**：Sass模块化，高复用性
+**设计原则**：极简、响应式、一致性、可维护
 
 ## 项目结构
 
 ```
 frontend/src/
-├── api/          # API接口（request, auth, chat, bazi）
-├── components/   # 公共组件（MessageBubble）
-├── pages/        # 页面（login, chat, profile, session, bazi）
-├── stores/       # Pinia状态（user, chat, bazi）
-├── types/        # TypeScript类型定义
-├── utils/        # 工具函数（storage, date, validator）
-├── styles/       # 全局样式
-│   ├── variables.scss  # 设计变量
-│   ├── mixins.scss     # 混入工具
-│   └── common.scss     # 通用样式
-└── static/       # 静态资源（logo, avatars, tabbar icons）
+├── api/          # API接口
+├── components/   # 公共组件
+├── pages/        # 页面
+├── stores/       # Pinia状态
+├── types/        # TypeScript类型
+├── utils/        # 工具函数
+├── styles/       # 全局样式（variables, mixins, common）
+└── static/       # 静态资源
 ```
 
 ## 设计系统
 
-### 色彩规范 (variables.scss)
+### 核心颜色
 
 ```scss
-// ============================================
-// 主题色彩（水墨风格：深墨色 + 古铜金）
-// ============================================
-
 // 主色
-$primary: #2c3e50;        // 深墨色（主要按钮、强调文字）
-$primary-dark: #1a252f;   // 深墨色加深（删除按钮、hover状态）
-$accent: #c9a87c;         // 古铜金（选中状态、高亮、链接）
+$primary: #2c3e50;        // 深墨色
+$accent: #c9a87c;         // 古铜金
 
-// 文字颜色
-$text-primary: #333333;   // 主要文字
-$text-secondary: #666666; // 次要文字
-$text-tertiary: #999999;  // 辅助文字
-$text-disabled: #cccccc;  // 禁用文字
-$text-inverse: #ffffff;   // 反色文字（深色背景上）
+// 文字
+$text-primary: #333333;
+$text-secondary: #666666;
+$text-tertiary: #999999;
 
-// 背景颜色
-$bg-page: #f8f6f1;       // 页面背景（宣纸黄）
-$bg-card: #ffffff;       // 卡片背景
-$bg-hover: #f5f5f5;      // 悬停/按压背景
+// 背景
+$bg-page: #f8f6f1;       // 宣纸黄
+$bg-card: #ffffff;
+$bg-hover: #f5f5f5;
 
-// 边框颜色
-$border-color: #e8e6df;  // 主边框
-$border-light: #f0f0f0;  // 浅边框
-
-// 状态颜色（谨慎使用）
-$success: #52c41a;       // 成功
-$warning: #faad14;       // 警告
-$error: #f5222d;         // 错误
+// 边框
+$border-color: #e8e6df;
 ```
 
-### 字体规范
+### 字体与间距
 
 ```scss
-// 字体大小（rpx单位，设计稿750px基准）
-$font-xs: 24rpx;   // 12px - 辅助信息
-$font-sm: 26rpx;   // 13px - 说明文字
-$font-base: 28rpx; // 14px - 正文（默认）
-$font-md: 30rpx;   // 15px - 小标题
-$font-lg: 32rpx;   // 16px - 标题
-$font-xl: 36rpx;   // 18px - 大标题
-$font-xxl: 40rpx;  // 20px - 特大标题
+// 字体大小（rpx，750px基准）
+$font-xs: 24rpx;   // 12px
+$font-sm: 26rpx;   // 13px
+$font-base: 28rpx; // 14px（默认）
+$font-lg: 32rpx;   // 16px
+$font-xl: 36rpx;   // 18px
 
-// 字重
-$weight-light: 300;
-$weight-normal: 400;
-$weight-medium: 500;
-$weight-semibold: 600;
-$weight-bold: 700;
-```
+// 间距（8rpx基准）
+$space-xs: 8rpx;
+$space-sm: 16rpx;
+$space-base: 24rpx;  // 默认
+$space-md: 32rpx;
+$space-lg: 40rpx;
+$space-xl: 48rpx;
 
-### 间距规范
-
-```scss
-// 统一间距（8rpx基准）
-$space-xs: 8rpx;    // 4px
-$space-sm: 16rpx;   // 8px
-$space-base: 24rpx; // 12px（默认）
-$space-md: 32rpx;   // 16px
-$space-lg: 40rpx;   // 20px
-$space-xl: 48rpx;   // 24px
-$space-xxl: 64rpx;  // 32px
-$space-xxxl: 96rpx; // 48px
-```
-
-### 圆角/阴影/动画
-
-```scss
 // 圆角
-$radius-sm: 8rpx;
 $radius-base: 12rpx;
 $radius-lg: 16rpx;
-$radius-xl: 24rpx;
 $radius-round: 999rpx;
-
-// 阴影
-$shadow-sm: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
-$shadow-md: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
-$shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.12);
-
-// 动画时长
-$duration-fast: 0.2s;
-$duration-base: 0.3s;
-$duration-slow: 0.5s;
-$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 ```
 
-### 常用混入 (mixins.scss)
+### 常用混入
 
 ```scss
 // 布局
@@ -150,109 +96,80 @@ $ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   justify-content: center;
 }
 
-@mixin flex-center-y {
-  display: flex;
-  align-items: center;
-}
-
 @mixin flex-between {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-@mixin flex-column {
-  display: flex;
-  flex-direction: column;
-}
-
-// 文字处理
+// 文字
 @mixin ellipsis {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-@mixin ellipsis-multi($lines: 2) {
-  display: -webkit-box;
-  -webkit-line-clamp: $lines;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-// 卡片样式
+// 卡片
 @mixin card-bordered {
   background: $bg-card;
   border-radius: $radius-base;
   border: 1rpx solid $border-color;
-  box-shadow: $shadow-sm;
-  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
-// 按钮样式
+// 按钮
 @mixin btn-primary {
   @include flex-center;
   background: $primary;
-  color: $text-inverse;
+  color: #ffffff;
   border-radius: $radius-round;
-  font-weight: $weight-medium;
-  box-shadow: $shadow-sm;
-  transition: all $duration-base $ease-in-out;
+  transition: all 0.3s;
   
   &:active {
     opacity: 0.9;
     transform: scale(0.98);
   }
 }
-
-@mixin btn-ghost {
-  @include flex-center;
-  background: transparent;
-  color: $text-secondary;
-  border: 1rpx solid $border-color;
-  border-radius: $radius-round;
-  transition: all $duration-base $ease-in-out;
-  
-  &:active {
-    background: $bg-hover;
-  }
-}
-
-// 安全区域
-@mixin safe-area-bottom {
-  padding-bottom: constant(safe-area-inset-bottom);
-  padding-bottom: env(safe-area-inset-bottom);
-}
 ```
 
-## 页面设计规范
+## 页面结构规范
 
-### 页面结构
+### 标准页面模板
 
 ```vue
 <template>
   <view class="page-name">
-    <!-- 自定义导航栏（可选） -->
-    <view class="custom-navbar" v-if="useCustomNav">
-      <text class="navbar-title">页面标题</text>
-    </view>
-    
     <!-- 内容区域 -->
     <view class="content">
-      <!-- 卡片式布局 -->
       <view class="section-card">
-        <view class="section-title">区块标题</view>
+        <view class="section-title">标题</view>
         <!-- 内容 -->
       </view>
     </view>
-    
-    <!-- 底部操作栏（可选） -->
-    <view class="footer-actions" v-if="hasActions">
-      <button class="action-btn">操作按钮</button>
-    </view>
   </view>
 </template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useUserStore } from '@/stores'
+
+// Props定义
+interface Props {
+  title: string
+  value?: string
+}
+const props = withDefaults(defineProps<Props>(), {
+  value: ''
+})
+
+// Events定义
+const emit = defineEmits<{
+  change: [value: string]
+}>()
+
+// 响应式数据
+const loading = ref(false)
+</script>
 
 <style scoped lang="scss">
 @import '@/styles/variables.scss';
@@ -261,39 +178,15 @@ $ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 .page-name {
   min-height: 100vh;
   background: $bg-page;
-  @include flex-column;
 }
 
 .content {
-  flex: 1;
   padding: $space-base;
 }
 
 .section-card {
   @include card-bordered;
   padding: $space-lg;
-  margin-bottom: $space-base;
-}
-
-.section-title {
-  font-size: $font-lg;
-  font-weight: $weight-bold;
-  color: $text-primary;
-  margin-bottom: $space-md;
-}
-
-.footer-actions {
-  background: $bg-card;
-  padding: $space-base;
-  border-top: 1rpx solid $border-color;
-  @include safe-area-bottom;
-}
-
-.action-btn {
-  @include btn-primary;
-  width: 100%;
-  height: 88rpx;
-  font-size: $font-base;
 }
 </style>
 ```
@@ -301,149 +194,84 @@ $ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 ### 组件设计原则
 
 1. **单一职责**：一个组件只做一件事
-2. **Props向下，Events向上**：保持数据流清晰
-3. **TypeScript约束**：明确的类型定义
-4. **样式隔离**：使用`scoped`，避免样式污染
-
-```vue
-<script setup lang="ts">
-// Props定义
-interface Props {
-  title: string
-  content?: string
-  type?: 'primary' | 'ghost'
-}
-const props = withDefaults(defineProps<Props>(), {
-  content: '',
-  type: 'primary'
-})
-
-// Events定义
-const emit = defineEmits<{
-  click: []
-  close: []
-}>()
-
-// 响应式数据
-const visible = ref(false)
-const isActive = computed(() => props.type === 'primary')
-</script>
-
-<template>
-  <view class="component" :class="{ 'is-active': isActive }">
-    <text class="title">{{ title }}</text>
-    <text class="content" v-if="content">{{ content }}</text>
-  </view>
-</template>
-
-<style scoped lang="scss">
-@import '@/styles/variables.scss';
-@import '@/styles/mixins.scss';
-
-.component {
-  @include card-bordered;
-  padding: $space-lg;
-  
-  &.is-active {
-    border-color: $accent;
-  }
-}
-
-.title {
-  font-size: $font-lg;
-  font-weight: $weight-bold;
-  color: $text-primary;
-}
-
-.content {
-  font-size: $font-base;
-  color: $text-secondary;
-  line-height: 1.6;
-  margin-top: $space-sm;
-}
-</style>
-```
+2. **Props向下，Events向上**
+3. **TypeScript约束**：明确类型
+4. **样式隔离**：使用 `scoped`
 
 ### 交互状态
 
 ```scss
 // 按钮交互
 .button {
-  transition: all $duration-base $ease-in-out;
+  transition: all 0.3s;
   
-  // 按压态（:active）
   &:active {
     opacity: 0.9;
     transform: scale(0.98);
   }
   
-  // 禁用态
   &.disabled {
     opacity: 0.5;
     pointer-events: none;
   }
 }
 
-// 列表项交互
+// 列表项
 .list-item {
-  background: $bg-card;
-  transition: background $duration-fast;
-  
   &:active {
     background: $bg-hover;
   }
 }
-
-// 输入框焦点态
-.input-field {
-  border: 1rpx solid $border-color;
-  transition: border-color $duration-fast;
-  
-  &:focus {
-    border-color: $accent;
-  }
-}
 ```
 
-## API 接口封装
+## API封装规范
 
 ```typescript
-// api/request.ts - 统一请求封装
+// api/request.ts - 统一请求
 export const request = <T>(options: UniApp.RequestOptions): Promise<T> => {
   return new Promise((resolve, reject) => {
     uni.request({
       ...options,
       url: BASE_URL + options.url,
-      header: { 'Authorization': `Bearer ${token}`, ...options.header },
-      success: (res) => res.data.code === 0 ? resolve(res.data.data) : reject(res.data),
+      header: { 
+        'Authorization': `Bearer ${token}`,
+        ...options.header 
+      },
+      success: (res) => {
+        if (res.data.code === 0) {
+          resolve(res.data.data)
+        } else {
+          reject(res.data)
+        }
+      },
       fail: reject
     })
   })
 }
 
-// api/chat.ts - API模块化
+// api/chat.ts - 模块化API
 export const chatApi = {
   sendMessage: (id: string, content: string) => 
     request({ url: '/api/v1/chat/message', method: 'POST', data: { id, content } })
 }
 ```
 
-## Pinia 状态管理
+## Pinia状态管理
 
 ```typescript
 // stores/user.ts
 export const useUserStore = defineStore('user', () => {
-  const userInfo = ref<User | null>(null)
+  const user = ref<User | null>(null)
   const token = ref('')
   const isLogin = computed(() => !!token.value)
   
   const login = async (code: string) => {
     const data = await authApi.wxLogin(code)
     token.value = data.token
-    userInfo.value = data.user
+    user.value = data.user
   }
   
-  return { userInfo, token, isLogin, login }
+  return { user, token, isLogin, login }
 })
 ```
 
@@ -462,11 +290,9 @@ export const useUserStore = defineStore('user', () => {
 </template>
 
 <script setup lang="ts">
-const login = () => {
-  // #ifdef MP-WEIXIN
-  uni.login({ provider: 'weixin' })
-  // #endif
-}
+// #ifdef MP-WEIXIN
+uni.login({ provider: 'weixin' })
+// #endif
 </script>
 ```
 
@@ -490,7 +316,7 @@ export const storage = {
 </view>
 
 <!-- 图片懒加载 -->
-<image :src="url" lazy-load mode="aspectFill" />
+<image :src="url" lazy-load mode="aspectFit" />
 ```
 
 ```typescript
@@ -507,7 +333,6 @@ export const debounce = (fn: Function, delay: number) => {
 ## 错误处理
 
 ```vue
-<!-- 加载状态 -->
 <script setup lang="ts">
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -527,37 +352,17 @@ const loadData = async () => {
 
 <template>
   <view v-if="loading" class="loading-state">
-    <text class="loading-icon">⏳</text>
-    <text class="loading-text">加载中...</text>
+    <text>加载中...</text>
   </view>
   
   <view v-else-if="error" class="error-state">
-    <text class="error-icon">❌</text>
-    <text class="error-text">{{ error }}</text>
+    <text>{{ error }}</text>
   </view>
   
   <view v-else class="content">
     <!-- 正常内容 -->
   </view>
 </template>
-
-<style scoped lang="scss">
-.loading-state, .error-state {
-  @include flex-center;
-  flex-direction: column;
-  min-height: 400rpx;
-  gap: $space-lg;
-}
-
-.loading-icon, .error-icon {
-  font-size: 96rpx;
-}
-
-.loading-text, .error-text {
-  font-size: $font-base;
-  color: $text-secondary;
-}
-</style>
 ```
 
 ## 小程序规范
@@ -569,20 +374,11 @@ const loadData = async () => {
 import { onLoad, onShow, onHide } from '@dcloudio/uni-app'
 
 onLoad((options) => {
-  // 获取路由参数
-  if (options?.id) {
-    loadData(options.id)
-  }
+  if (options?.id) loadData(options.id)
 })
 
 onShow(() => {
-  // 页面显示时刷新数据
   refreshData()
-})
-
-onHide(() => {
-  // 页面隐藏时暂停操作
-  pauseTimer()
 })
 </script>
 ```
@@ -595,122 +391,75 @@ onHide(() => {
   "tabBar": {
     "color": "#8c8c8c",
     "selectedColor": "#c9a87c",
-    "backgroundColor": "#ffffff",
-    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/session/index",
         "text": "会话",
         "iconPath": "static/tabbar/session.png",
         "selectedIconPath": "static/tabbar/session-active.png"
-      },
-      {
-        "pagePath": "pages/profile/index",
-        "text": "我的",
-        "iconPath": "static/tabbar/profile.png",
-        "selectedIconPath": "static/tabbar/profile-active.png"
       }
     ]
   }
 }
 ```
 
-**注意**：TabBar图标仅支持 `.png/.jpg/.jpeg` 格式，建议尺寸 81×81 像素。
+**注意**：TabBar图标仅支持 `.png/.jpg/.jpeg`，建议81×81像素。
 
-## 最佳实践
+## 最佳实践清单
 
-### 设计清单
-
-- ✅ 遵循极简复古风格（深墨色 + 古铜金）
-- ✅ 使用统一的设计变量（颜色、字体、间距）
+### 设计
+- ✅ 遵循极简复古风格
+- ✅ 使用统一的设计变量
 - ✅ 卡片化布局，充分留白
-- ✅ 交互动画简洁流畅（0.2-0.3s）
-- ✅ 图标风格统一（复古/线性风格）
+- ✅ 交互动画简洁（0.2-0.3s）
 
-### 代码清单
-
+### 代码
 - ✅ TypeScript类型完整
-- ✅ 使用Sass变量和混入（避免硬编码）
+- ✅ 使用Sass变量和混入
 - ✅ 组件props/emits定义清晰
-- ✅ 异常处理完善（loading + error状态）
-- ✅ 多端兼容性验证（微信小程序优先）
+- ✅ 异常处理完善（loading + error）
+- ✅ 多端兼容性验证
 
-### 性能清单
-
+### 性能
 - ✅ 列表使用虚拟滚动（>50条）
 - ✅ 图片使用懒加载
 - ✅ 输入框使用防抖（500ms）
-- ✅ 滚动事件使用节流（100ms）
-- ✅ 避免在模板中使用复杂计算
+- ✅ 避免模板中复杂计算
 
-### 测试清单
-
-- ✅ 微信小程序真机测试（必测）
-- ✅ 不同屏幕尺寸适配（小屏/大屏）
-- ✅ 深色/浅色模式兼容（可选）
-- ✅ 清除缓存后测试（避免缓存问题）
+### 测试
+- ✅ 微信小程序真机测试
+- ✅ 不同屏幕尺寸适配
+- ✅ 清除缓存后测试
 
 ## 常见问题
 
-### 1. 微信开发者工具不显示TabBar图标
-```bash
-# 解决方案：
-# 1. 清除缓存：工具 → 清除缓存 → 清除全部缓存
-# 2. 重新编译：点击"编译"按钮
-# 3. 确认图标格式为PNG（不支持SVG）
-```
+### 1. TabBar图标不显示
+- 清除缓存：工具 → 清除缓存
+- 确认图标格式为PNG
+- 重新编译
 
-### 2. 用户ID显示不一致
-```typescript
-// 问题：Profile页和Edit页显示不同的ID
-// 解决：使用统一的hash算法生成8位数字ID
-
-function formatUserId(openid: string | undefined): string {
-  if (!openid) return '--------'
-  
-  let hash = 0
-  for (let i = 0; i < openid.length; i++) {
-    hash = ((hash << 5) - hash) + openid.charCodeAt(i)
-    hash = hash & hash
-  }
-  
-  const num = Math.abs(hash) % 90000000 + 10000000
-  return String(num)
-}
-```
-
-### 3. 输入框向左延伸遮挡按钮
+### 2. 输入框向左延伸遮挡按钮
 ```scss
-// 问题：flex输入框宽度不受限制
-// 解决：使用 width: 0 约束
-
 .input-container {
   display: flex;
-  align-items: center;
   gap: $space-md;
 }
 
 .input-field {
   flex: 1;
   width: 0;  // 关键：约束宽度
-  box-sizing: border-box;
 }
 ```
 
-### 4. 左滑操作DOM报错
+### 3. 左滑操作DOM报错
 ```typescript
-// 问题：状态切换时机不当导致DOM操作冲突
-// 解决：先执行业务逻辑，再关闭滑动状态
-
+// 先执行业务逻辑，再关闭滑动状态
 async function handlePin(id: string) {
-  // 先执行置顶操作
-  pinnedIds.value = pinnedIds.value.includes(id)
-    ? pinnedIds.value.filter(pid => pid !== id)
-    : [id, ...pinnedIds.value]
+  // 先执行操作
+  pinnedIds.value = ...
+  storage.set('pinned', pinnedIds.value)
   
-  storage.set('pinned_conversations', pinnedIds.value)
-  
-  // 操作完成后关闭滑动
+  // 操作完成后关闭
   await nextTick()
   swipingId.value = null
 }
@@ -718,12 +467,6 @@ async function handlePin(id: string) {
 
 ---
 
-**文档版本**：v4.0  
+**文档版本**：v5.0  
 **最后更新**：2025-10-23  
-**更新内容**：新增极简复古设计风格指南、完整设计系统、常见问题解决方案
-
-**核心变更**：
-- v4.0: 新增极简复古设计系统、完整的设计变量和混入、常见问题解决方案
-- v3.0: 大幅精简，聚焦uni-app多端特性
-- v2.0: 新增响应式设计和多端兼容规范
-- v1.0: 初始版本
+**行数**：约450行（精简版）
